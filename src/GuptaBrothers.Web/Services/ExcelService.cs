@@ -324,9 +324,10 @@ namespace GuptaBrothers.Web.Services
             {
                 var row = worksheet.Row(r);
                 int matchCount = 0;
-                for (int c = 1; c <= Math.Min(25, worksheet.ColumnsUsed().Count()); c++)
+                int cols = Math.Min(35, worksheet.ColumnsUsed().Count());
+                for (int c = 1; c <= cols; c++)
                 {
-                    var text = row.Cell(c).GetString().Trim();
+                    var text = row.Cell(c).GetString();
                     if (IsKnownHeader(text))
                     {
                         matchCount++;
@@ -348,7 +349,11 @@ namespace GuptaBrothers.Web.Services
                 var val = headerRow.Cell(col).GetString().Trim();
                 if (!string.IsNullOrEmpty(val))
                 {
-                    colIndexMap[val] = col;
+                    var norm = NormalizeKey(val);
+                    if (!string.IsNullOrEmpty(norm) && !colIndexMap.ContainsKey(norm))
+                    {
+                        colIndexMap[norm] = col;
+                    }
                 }
             }
 
@@ -356,10 +361,19 @@ namespace GuptaBrothers.Web.Services
             {
                 foreach (var h in possibleHeaders)
                 {
-                    if (colIndexMap.TryGetValue(h, out int colIndex))
+                    var norm = NormalizeKey(h);
+                    if (colIndexMap.TryGetValue(norm, out int colIndex))
                     {
                         var cell = row.Cell(colIndex);
-                        return cell.GetString().Trim();
+                        if (cell == null || cell.IsEmpty()) continue;
+                        try
+                        {
+                            var s = cell.GetFormattedString()?.Trim();
+                            if (!string.IsNullOrEmpty(s)) return s;
+                        }
+                        catch { }
+                        var fallback = cell.GetString()?.Trim();
+                        if (!string.IsNullOrEmpty(fallback)) return fallback;
                     }
                 }
                 return "";
@@ -378,9 +392,9 @@ namespace GuptaBrothers.Web.Services
                 var row = worksheet.Row(r);
                 if (row.IsEmpty()) continue;
 
-                var awb = GetVal(row, "Tracking Number", "AWB", "AWBNumber", "TrackingNumber", "Tracking No", "Waybill");
-                var customerName = GetVal(row, "Customer Name", "CustomerName", "Customer", "Name", "Recipient", "Buyer");
-                var orderNo = GetVal(row, "Order No", "OrderNo", "Order Number", "Order_No", "Order ID", "OrderId");
+                var awb = GetVal(row, "waybillnumber", "waybill", "waybillno", "trackingnumber", "tracking no", "awb", "awbnumber", "tracking", "airwaybill");
+                var customerName = GetVal(row, "cosutmername", "customername", "cosutmer", "customer", "buyername", "buyer", "recipientname", "recipient", "name", "clientname");
+                var orderNo = GetVal(row, "orderid", "orderno", "order number", "order_no", "order", "purchaseorderno", "pono");
 
                 if (string.IsNullOrWhiteSpace(awb) && string.IsNullOrWhiteSpace(customerName) && string.IsNullOrWhiteSpace(orderNo))
                 {
@@ -392,58 +406,66 @@ namespace GuptaBrothers.Web.Services
                     awb = "VL" + DateTime.Now.ToString("yyMMdd") + new Random().Next(10000, 99999);
                 }
 
+                var sellerName = GetVal(row, "sellername", "seller", "soldby", "returncompanyname", "returnsellername", "returnseller", "returnname", "vendorname", "vendor");
+                var sellerAddr = GetVal(row, "selleraddress", "returnselleraddress", "returnaddress", "selleraddr", "returnaddr");
+                var custAddr = GetVal(row, "cosutmeraddress", "cosutmer_address", "customeraddress", "deliveryaddress", "shippingaddress", "fulladdress", "address");
+                var hubCode = GetVal(row, "hubcode", "hub", "ufcname", "ufc", "ufccode", "destinationhub");
+                var pickupDate = GetVal(row, "date", "pickupdate", "pickup date", "pickupdatebadge", "orderdate", "batch");
+                var payment = GetVal(row, "paymentinstruction", "paymentstatus", "payment", "paymenttype", "codprepaid", "cod");
+                var sku = GetVal(row, "sku", "productcode", "itemcode", "itemdescription", "product");
+                var size = GetVal(row, "size", "productsize");
+                var qty = GetInt(row, "qty", "quantity", "itemqty");
+                var color = GetVal(row, "color", "colour");
+
                 var label = new ShippingLabelModel
                 {
                     AWBNumber = awb,
                     QRCodeData = awb, // Strictly only tracking number in QR code
                     CourierName = defaults.DefaultCourierName,
-                    PickupDateBadge = ValueOrDefault(GetVal(row, "Date", "PickupDate", "PickupDateBadge", "Pickup Date", "Batch"), "01/11"),
-                    HubCode = ValueOrDefault(GetVal(row, "UFC Name", "UFC", "HubCode", "Hub", "Hub Code"), defaults.DefaultHubCode),
-                    PaymentStatus = ValueOrDefault(GetVal(row, "Payment Instruction", "PaymentStatus", "Payment", "Payment Type", "COD/Prepaid"), "Check the payable amount on the app"),
+                    PickupDateBadge = ValueOrDefault(pickupDate, "01/11"),
+                    HubCode = ValueOrDefault(hubCode, defaults.DefaultHubCode),
+                    PaymentStatus = ValueOrDefault(payment, "Check the payable amount on the app"),
                     CustomerName = customerName,
-                    SKU = ValueOrDefault(GetVal(row, "SKU", "ProductCode", "ItemCode"), "SKU-" + new Random().Next(1000, 9999)),
-                    Size = ValueOrDefault(GetVal(row, "Size", "ProductSize"), "Free Size"),
-                    Qty = GetInt(row, "Qty", "Quantity", "ItemQty"),
-                    Color = ValueOrDefault(GetVal(row, "Color", "Colour"), "NA"),
+                    SKU = ValueOrDefault(sku, "SKU-" + (awb.Length >= 5 ? awb.Substring(awb.Length - 5) : new Random().Next(1000, 9999).ToString())),
+                    Size = ValueOrDefault(size, "Free Size"),
+                    Qty = qty > 0 ? qty : 1,
+                    Color = ValueOrDefault(color, "NA"),
                     OrderNo = ValueOrDefault(orderNo, "ORD-" + new Random().Next(10000000, 99999999))
                 };
 
                 // Parse Web QR Code Text (multiline routing codes: line 1, line 2, line 3)
-                var webQrText = GetVal(row, "Web QR Code Text", "Web QRCode Text", "Routing", "RoutingLines");
+                var webQrText = GetVal(row, "webqrcodetext", "webqrcode", "routing", "routinglines");
                 ParseRoutingLines(webQrText, label);
 
-                // Parse Customer Address (single composite column or legacy columns)
-                var custAddrFull = GetVal(row, "Customer Address", "CustomerAddress", "Full Address", "Address");
-                if (!string.IsNullOrWhiteSpace(custAddrFull))
+                // Parse Customer Address
+                if (!string.IsNullOrWhiteSpace(custAddr))
                 {
-                    ParseCustomerAddress(custAddrFull, label);
+                    ParseCustomerAddress(custAddr, label);
                 }
                 else
                 {
-                    label.CustomerAddressLine1 = GetVal(row, "AddressLine1", "Address 1", "Street");
-                    label.CustomerAddressLine2 = GetVal(row, "AddressLine2", "Address 2", "Locality", "Landmark");
-                    label.CustomerCity = GetVal(row, "City", "CustomerCity", "District");
-                    label.CustomerState = GetVal(row, "State", "CustomerState", "Province");
-                    label.CustomerPincode = GetVal(row, "Pincode", "CustomerPincode", "Pin", "Zip", "PostalCode");
+                    label.CustomerAddressLine1 = GetVal(row, "addressline1", "address 1", "street");
+                    label.CustomerAddressLine2 = GetVal(row, "addressline2", "address 2", "locality", "landmark");
+                    label.CustomerCity = GetVal(row, "city", "customercity", "district");
+                    label.CustomerState = GetVal(row, "state", "customerstate", "province");
+                    label.CustomerPincode = GetVal(row, "pincode", "customerpincode", "pin", "zip", "postalcode");
                 }
 
                 // Parse Return / Seller Name & Address
-                var retSellerName = GetVal(row, "Return / Seller Name", "Return / Seller", "Return Name", "Seller Name", "SoldBy", "ReturnCompanyName");
-                label.ReturnCompanyName = ValueOrDefault(retSellerName, defaults.DefaultReturnCompanyName);
-                label.SoldBy = ValueOrDefault(retSellerName, defaults.DefaultSoldBy);
+                label.ReturnCompanyName = ValueOrDefault(sellerName, defaults.DefaultReturnCompanyName);
+                label.SoldBy = ValueOrDefault(sellerName, defaults.DefaultSoldBy);
 
-                var retSellerAddr = GetVal(row, "Return / Seller Address", "Return Address", "Seller Address", "ReturnAddress");
-                if (!string.IsNullOrWhiteSpace(retSellerAddr))
+                if (!string.IsNullOrWhiteSpace(sellerAddr))
                 {
-                    ParseReturnAddress(retSellerAddr, label);
+                    ParseReturnAddress(sellerAddr, label);
                 }
                 else
                 {
-                    label.ReturnAddressLine1 = ValueOrDefault(GetVal(row, "ReturnAddressLine1"), defaults.DefaultReturnAddressLine1);
-                    label.ReturnAddressLine2 = ValueOrDefault(GetVal(row, "ReturnAddressLine2"), defaults.DefaultReturnAddressLine2);
-                    label.ReturnArea = ValueOrDefault(GetVal(row, "ReturnArea"), defaults.DefaultReturnArea);
-                    label.ReturnCityStatePin = ValueOrDefault(GetVal(row, "ReturnCityStatePin"), defaults.DefaultReturnCityStatePin);
-                    label.SellerAddress = ValueOrDefault(GetVal(row, "SellerAddress"), defaults.DefaultSellerAddress);
+                    label.ReturnAddressLine1 = ValueOrDefault(GetVal(row, "returnaddressline1"), defaults.DefaultReturnAddressLine1);
+                    label.ReturnAddressLine2 = ValueOrDefault(GetVal(row, "returnaddressline2"), defaults.DefaultReturnAddressLine2);
+                    label.ReturnArea = ValueOrDefault(GetVal(row, "returnarea"), defaults.DefaultReturnArea);
+                    label.ReturnCityStatePin = ValueOrDefault(GetVal(row, "returncitystatepin"), defaults.DefaultReturnCityStatePin);
+                    label.SellerAddress = ValueOrDefault(GetVal(row, "selleraddress"), defaults.DefaultSellerAddress);
                 }
 
                 label.SellerGSTIN = defaults.DefaultSellerGSTIN;
@@ -476,7 +498,7 @@ namespace GuptaBrothers.Web.Services
             int headerIdx = 0;
             for (int i = 0; i < Math.Min(10, records.Count); i++)
             {
-                int matchCount = records[i].Count(cell => IsKnownHeader(cell.Trim()));
+                int matchCount = records[i].Count(cell => IsKnownHeader(cell));
                 if (matchCount >= 2)
                 {
                     headerIdx = i;
@@ -491,7 +513,11 @@ namespace GuptaBrothers.Web.Services
                 var h = headerRow[i].Trim();
                 if (!string.IsNullOrEmpty(h))
                 {
-                    colIndexMap[h] = i;
+                    var norm = NormalizeKey(h);
+                    if (!string.IsNullOrEmpty(norm) && !colIndexMap.ContainsKey(norm))
+                    {
+                        colIndexMap[norm] = i;
+                    }
                 }
             }
 
@@ -499,9 +525,11 @@ namespace GuptaBrothers.Web.Services
             {
                 foreach (var h in possibleHeaders)
                 {
-                    if (colIndexMap.TryGetValue(h, out int idx) && idx < row.Count)
+                    var norm = NormalizeKey(h);
+                    if (colIndexMap.TryGetValue(norm, out int idx) && idx < row.Count)
                     {
-                        return row[idx].Trim();
+                        var val = row[idx]?.Trim();
+                        if (!string.IsNullOrEmpty(val)) return val;
                     }
                 }
                 return "";
@@ -520,9 +548,9 @@ namespace GuptaBrothers.Web.Services
                 var row = records[i];
                 if (row.Count == 0 || row.All(string.IsNullOrWhiteSpace)) continue;
 
-                var awb = GetVal(row, "Tracking Number", "AWB", "AWBNumber", "TrackingNumber", "Tracking No", "Waybill");
-                var customerName = GetVal(row, "Customer Name", "CustomerName", "Customer", "Name", "Recipient", "Buyer");
-                var orderNo = GetVal(row, "Order No", "OrderNo", "Order Number", "Order_No", "Order ID", "OrderId");
+                var awb = GetVal(row, "waybillnumber", "waybill", "waybillno", "trackingnumber", "tracking no", "awb", "awbnumber", "tracking", "airwaybill");
+                var customerName = GetVal(row, "cosutmername", "customername", "cosutmer", "customer", "buyername", "buyer", "recipientname", "recipient", "name", "clientname");
+                var orderNo = GetVal(row, "orderid", "orderno", "order number", "order_no", "order", "purchaseorderno", "pono");
 
                 if (string.IsNullOrWhiteSpace(awb) && string.IsNullOrWhiteSpace(customerName) && string.IsNullOrWhiteSpace(orderNo))
                 {
@@ -534,58 +562,66 @@ namespace GuptaBrothers.Web.Services
                     awb = "VL" + DateTime.Now.ToString("yyMMdd") + new Random().Next(10000, 99999);
                 }
 
+                var sellerName = GetVal(row, "sellername", "seller", "soldby", "returncompanyname", "returnsellername", "returnseller", "returnname", "vendorname", "vendor");
+                var sellerAddr = GetVal(row, "selleraddress", "returnselleraddress", "returnaddress", "selleraddr", "returnaddr");
+                var custAddr = GetVal(row, "cosutmeraddress", "cosutmer_address", "customeraddress", "deliveryaddress", "shippingaddress", "fulladdress", "address");
+                var hubCode = GetVal(row, "hubcode", "hub", "ufcname", "ufc", "ufccode", "destinationhub");
+                var pickupDate = GetVal(row, "date", "pickupdate", "pickup date", "pickupdatebadge", "orderdate", "batch");
+                var payment = GetVal(row, "paymentinstruction", "paymentstatus", "payment", "paymenttype", "codprepaid", "cod");
+                var sku = GetVal(row, "sku", "productcode", "itemcode", "itemdescription", "product");
+                var size = GetVal(row, "size", "productsize");
+                var qty = GetInt(row, "qty", "quantity", "itemqty");
+                var color = GetVal(row, "color", "colour");
+
                 var label = new ShippingLabelModel
                 {
                     AWBNumber = awb,
                     QRCodeData = awb, // Strictly only tracking number
                     CourierName = defaults.DefaultCourierName,
-                    PickupDateBadge = ValueOrDefault(GetVal(row, "Date", "PickupDate", "PickupDateBadge", "Pickup Date", "Batch"), "01/11"),
-                    HubCode = ValueOrDefault(GetVal(row, "UFC Name", "UFC", "HubCode", "Hub", "Hub Code"), defaults.DefaultHubCode),
-                    PaymentStatus = ValueOrDefault(GetVal(row, "Payment Instruction", "PaymentStatus", "Payment", "Payment Type", "COD/Prepaid"), "Check the payable amount on the app"),
+                    PickupDateBadge = ValueOrDefault(pickupDate, "01/11"),
+                    HubCode = ValueOrDefault(hubCode, defaults.DefaultHubCode),
+                    PaymentStatus = ValueOrDefault(payment, "Check the payable amount on the app"),
                     CustomerName = customerName,
-                    SKU = ValueOrDefault(GetVal(row, "SKU", "ProductCode", "ItemCode"), "SKU-" + new Random().Next(1000, 9999)),
-                    Size = ValueOrDefault(GetVal(row, "Size", "ProductSize"), "Free Size"),
-                    Qty = GetInt(row, "Qty", "Quantity", "ItemQty"),
-                    Color = ValueOrDefault(GetVal(row, "Color", "Colour"), "NA"),
+                    SKU = ValueOrDefault(sku, "SKU-" + (awb.Length >= 5 ? awb.Substring(awb.Length - 5) : new Random().Next(1000, 9999).ToString())),
+                    Size = ValueOrDefault(size, "Free Size"),
+                    Qty = qty > 0 ? qty : 1,
+                    Color = ValueOrDefault(color, "NA"),
                     OrderNo = ValueOrDefault(orderNo, "ORD-" + new Random().Next(10000000, 99999999))
                 };
 
                 // Parse Web QR Code Text
-                var webQrText = GetVal(row, "Web QR Code Text", "Web QRCode Text", "Routing", "RoutingLines");
+                var webQrText = GetVal(row, "webqrcodetext", "webqrcode", "routing", "routinglines");
                 ParseRoutingLines(webQrText, label);
 
                 // Parse Customer Address
-                var custAddrFull = GetVal(row, "Customer Address", "CustomerAddress", "Full Address", "Address");
-                if (!string.IsNullOrWhiteSpace(custAddrFull))
+                if (!string.IsNullOrWhiteSpace(custAddr))
                 {
-                    ParseCustomerAddress(custAddrFull, label);
+                    ParseCustomerAddress(custAddr, label);
                 }
                 else
                 {
-                    label.CustomerAddressLine1 = GetVal(row, "AddressLine1", "Address 1", "Street");
-                    label.CustomerAddressLine2 = GetVal(row, "AddressLine2", "Address 2", "Locality", "Landmark");
-                    label.CustomerCity = GetVal(row, "City", "CustomerCity", "District");
-                    label.CustomerState = GetVal(row, "State", "CustomerState", "Province");
-                    label.CustomerPincode = GetVal(row, "Pincode", "CustomerPincode", "Pin", "Zip", "PostalCode");
+                    label.CustomerAddressLine1 = GetVal(row, "addressline1", "address 1", "street");
+                    label.CustomerAddressLine2 = GetVal(row, "addressline2", "address 2", "locality", "landmark");
+                    label.CustomerCity = GetVal(row, "city", "customercity", "district");
+                    label.CustomerState = GetVal(row, "state", "customerstate", "province");
+                    label.CustomerPincode = GetVal(row, "pincode", "customerpincode", "pin", "zip", "postalcode");
                 }
 
                 // Parse Return / Seller Name & Address
-                var retSellerName = GetVal(row, "Return / Seller Name", "Return / Seller", "Return Name", "Seller Name", "SoldBy", "ReturnCompanyName");
-                label.ReturnCompanyName = ValueOrDefault(retSellerName, defaults.DefaultReturnCompanyName);
-                label.SoldBy = ValueOrDefault(retSellerName, defaults.DefaultSoldBy);
+                label.ReturnCompanyName = ValueOrDefault(sellerName, defaults.DefaultReturnCompanyName);
+                label.SoldBy = ValueOrDefault(sellerName, defaults.DefaultSoldBy);
 
-                var retSellerAddr = GetVal(row, "Return / Seller Address", "Return Address", "Seller Address", "ReturnAddress");
-                if (!string.IsNullOrWhiteSpace(retSellerAddr))
+                if (!string.IsNullOrWhiteSpace(sellerAddr))
                 {
-                    ParseReturnAddress(retSellerAddr, label);
+                    ParseReturnAddress(sellerAddr, label);
                 }
                 else
                 {
-                    label.ReturnAddressLine1 = ValueOrDefault(GetVal(row, "ReturnAddressLine1"), defaults.DefaultReturnAddressLine1);
-                    label.ReturnAddressLine2 = ValueOrDefault(GetVal(row, "ReturnAddressLine2"), defaults.DefaultReturnAddressLine2);
-                    label.ReturnArea = ValueOrDefault(GetVal(row, "ReturnArea"), defaults.DefaultReturnArea);
-                    label.ReturnCityStatePin = ValueOrDefault(GetVal(row, "ReturnCityStatePin"), defaults.DefaultReturnCityStatePin);
-                    label.SellerAddress = ValueOrDefault(GetVal(row, "SellerAddress"), defaults.DefaultSellerAddress);
+                    label.ReturnAddressLine1 = ValueOrDefault(GetVal(row, "returnaddressline1"), defaults.DefaultReturnAddressLine1);
+                    label.ReturnAddressLine2 = ValueOrDefault(GetVal(row, "returnaddressline2"), defaults.DefaultReturnAddressLine2);
+                    label.ReturnArea = ValueOrDefault(GetVal(row, "returnarea"), defaults.DefaultReturnArea);
+                    label.ReturnCityStatePin = ValueOrDefault(GetVal(row, "returncitystatepin"), defaults.DefaultReturnCityStatePin);
+                    label.SellerAddress = ValueOrDefault(GetVal(row, "selleraddress"), defaults.DefaultSellerAddress);
                 }
 
                 label.SellerGSTIN = defaults.DefaultSellerGSTIN;
@@ -596,21 +632,41 @@ namespace GuptaBrothers.Web.Services
             return results;
         }
 
-        private static bool IsKnownHeader(string header)
+        public static string NormalizeKey(string? header)
+        {
+            if (string.IsNullOrWhiteSpace(header)) return "";
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in header)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(char.ToLowerInvariant(c));
+            }
+            return sb.ToString();
+        }
+
+        private static bool IsKnownHeader(string? header)
         {
             if (string.IsNullOrWhiteSpace(header)) return false;
-            var h = header.Trim().ToLowerInvariant();
-            return h.Contains("date") ||
-                   h.Contains("customer name") ||
-                   h.Contains("customer address") ||
-                   h.Contains("return / seller") ||
-                   h.Contains("ufc") ||
-                   h.Contains("web qr") ||
-                   h.Contains("tracking") ||
-                   h.Contains("sku") ||
-                   h.Contains("order no") ||
-                   h.Contains("awb") ||
-                   h.Contains("payment instruction");
+            var norm = NormalizeKey(header);
+            return norm.Contains("waybill") ||
+                   norm.Contains("tracking") ||
+                   norm.Contains("awb") ||
+                   norm.Contains("order") ||
+                   norm.Contains("seller") ||
+                   norm.Contains("cosutmer") ||
+                   norm.Contains("customer") ||
+                   norm.Contains("hub") ||
+                   norm.Contains("ufc") ||
+                   norm.Contains("sku") ||
+                   norm.Contains("product") ||
+                   norm.Contains("item") ||
+                   norm.Contains("address") ||
+                   norm.Contains("date") ||
+                   norm.Contains("qty") ||
+                   norm.Contains("quantity") ||
+                   norm.Contains("payment") ||
+                   norm.Contains("return") ||
+                   norm.Contains("soldby");
         }
 
         private static void ParseRoutingLines(string webQrText, ShippingLabelModel label)
@@ -637,80 +693,114 @@ namespace GuptaBrothers.Web.Services
         {
             if (string.IsNullOrWhiteSpace(fullAddress)) return;
 
-            var parts = fullAddress.Split(',')
+            fullAddress = fullAddress.Trim().TrimEnd(',');
+
+            // Extract 6-digit pincode if present
+            var pinMatch = Regex.Match(fullAddress, @"\b([1-9][0-9]{5})\b");
+            if (pinMatch.Success)
+            {
+                label.CustomerPincode = pinMatch.Value;
+            }
+
+            var parts = fullAddress.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(p => p.Trim())
                 .Where(p => !string.IsNullOrEmpty(p))
                 .ToList();
 
-            if (parts.Count == 0) return;
-
-            // Check if the last part is a 6-digit pincode
-            int lastIdx = parts.Count - 1;
-            if (Regex.IsMatch(parts[lastIdx], @"^\d{6}$"))
+            if (parts.Count == 0)
             {
-                label.CustomerPincode = parts[lastIdx];
-                parts.RemoveAt(lastIdx);
+                label.CustomerAddressLine1 = fullAddress;
+                return;
             }
 
-            if (parts.Count > 0)
+            // Remove standalone pincode from last part if matched
+            if (parts.Count > 1 && Regex.IsMatch(parts[parts.Count - 1], @"^\d{6}$"))
             {
+                parts.RemoveAt(parts.Count - 1);
+            }
+
+            if (parts.Count == 1)
+            {
+                label.CustomerAddressLine1 = parts[0];
+            }
+            else if (parts.Count == 2)
+            {
+                label.CustomerAddressLine1 = parts[0];
+                label.CustomerAddressLine2 = parts[1];
+                var words = parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (words.Length == 1)
+                {
+                    label.CustomerCity = words[0];
+                }
+                else if (words.Length >= 2)
+                {
+                    label.CustomerCity = words[words.Length - 2];
+                    label.CustomerState = words[words.Length - 1];
+                }
+            }
+            else if (parts.Count == 3)
+            {
+                label.CustomerAddressLine1 = parts[0];
+                label.CustomerAddressLine2 = parts[1];
+                label.CustomerCity = parts[2];
+            }
+            else
+            {
+                label.CustomerAddressLine1 = parts[0];
+                label.CustomerAddressLine2 = string.Join(", ", parts.Skip(1).Take(parts.Count - 3));
+                if (string.IsNullOrWhiteSpace(label.CustomerAddressLine2))
+                {
+                    label.CustomerAddressLine2 = parts[1];
+                }
+                label.CustomerCity = parts[parts.Count - 2];
                 label.CustomerState = parts[parts.Count - 1];
-                parts.RemoveAt(parts.Count - 1);
-            }
-
-            if (parts.Count > 0)
-            {
-                label.CustomerCity = parts[parts.Count - 1];
-                parts.RemoveAt(parts.Count - 1);
-            }
-
-            if (parts.Count > 1)
-            {
-                label.CustomerAddressLine1 = parts[0];
-                label.CustomerAddressLine2 = string.Join(", ", parts.Skip(1));
-            }
-            else if (parts.Count == 1)
-            {
-                label.CustomerAddressLine1 = parts[0];
             }
         }
 
         private static void ParseReturnAddress(string fullAddress, ShippingLabelModel label)
         {
             if (string.IsNullOrWhiteSpace(fullAddress)) return;
-            label.SellerAddress = fullAddress;
+            label.SellerAddress = fullAddress.Trim().TrimEnd(',');
 
-            var parts = fullAddress.Split(',')
+            var pinMatch = Regex.Match(fullAddress, @"\b([1-9][0-9]{5})\b");
+            string pin = pinMatch.Success ? pinMatch.Value : "395006";
+
+            var parts = fullAddress.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(p => p.Trim())
                 .Where(p => !string.IsNullOrEmpty(p))
                 .ToList();
 
             if (parts.Count == 0) return;
 
-            // e.g. "B-69, shantiniketan soc, opp sagar soc , behind gujrat mobile, kapodra, surat, Gujarat, 395006"
-            if (parts.Count >= 4)
-            {
-                var last = parts[parts.Count - 1];
-                var secondLast = parts[parts.Count - 2];
-                var thirdLast = parts[parts.Count - 3];
-                label.ReturnCityStatePin = $"{thirdLast}, {secondLast}, {last}";
-                label.ReturnArea = parts.Count >= 5 ? parts[parts.Count - 4] : "";
+            var streetParts = parts.Where(p =>
+                !Regex.IsMatch(p, @"^(pincode\s*)?\d{6}$", RegexOptions.IgnoreCase) &&
+                !string.Equals(p, "Gujarat", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(p, "Surat", StringComparison.OrdinalIgnoreCase)
+            ).ToList();
 
-                int remainingCount = parts.Count - (parts.Count >= 5 ? 4 : 3);
-                if (remainingCount >= 2)
-                {
-                    label.ReturnAddressLine1 = string.Join(", ", parts.Take(remainingCount - 1));
-                    label.ReturnAddressLine2 = parts[remainingCount - 1];
-                }
-                else if (remainingCount == 1)
-                {
-                    label.ReturnAddressLine1 = parts[0];
-                }
+            if (streetParts.Count >= 3)
+            {
+                label.ReturnAddressLine1 = string.Join(", ", streetParts.Take(streetParts.Count - 2));
+                label.ReturnAddressLine2 = streetParts[streetParts.Count - 2];
+                label.ReturnArea = streetParts[streetParts.Count - 1];
+            }
+            else if (streetParts.Count == 2)
+            {
+                label.ReturnAddressLine1 = streetParts[0];
+                label.ReturnAddressLine2 = streetParts[1];
+                label.ReturnArea = "Kapodra";
+            }
+            else if (streetParts.Count == 1)
+            {
+                label.ReturnAddressLine1 = streetParts[0];
+                label.ReturnArea = "Kapodra";
             }
             else
             {
                 label.ReturnAddressLine1 = fullAddress;
             }
+
+            label.ReturnCityStatePin = $"Surat, Gujarat, {pin}";
         }
 
         private static string FormatCustomerAddress(ShippingLabelModel label)

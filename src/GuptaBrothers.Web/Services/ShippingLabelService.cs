@@ -134,7 +134,10 @@ namespace GuptaBrothers.Web.Services
                 var list = query.OrderByDescending(x => x.CreatedAt).ToList();
                 foreach (var item in list)
                 {
-                    EnsureQrAndBarcode(item);
+                    if (string.IsNullOrEmpty(item.BarcodeSvg) || string.IsNullOrEmpty(item.QrCodeBase64))
+                    {
+                        EnsureQrAndBarcode(item);
+                    }
                 }
                 return list;
             }
@@ -180,14 +183,16 @@ namespace GuptaBrothers.Web.Services
 
         public void AddRange(IEnumerable<ShippingLabelModel> labels)
         {
+            var list = labels.ToList();
+            Parallel.ForEach(list, l =>
+            {
+                l.AutoCalculate();
+                EnsureQrAndBarcode(l);
+            });
+
             lock (_lock)
             {
-                foreach (var l in labels)
-                {
-                    l.AutoCalculate();
-                    EnsureQrAndBarcode(l);
-                    _cache.Insert(0, l);
-                }
+                _cache.InsertRange(0, list);
                 PersistData();
             }
         }
@@ -245,14 +250,23 @@ namespace GuptaBrothers.Web.Services
         {
             // Barcode
             var barcodeText = !string.IsNullOrWhiteSpace(label.AWBNumber) ? label.AWBNumber.Trim() : (label.OrderNo ?? "").Trim();
-            label.BarcodeSvg = _qrBarcodeService.GenerateBarcodeSvg(barcodeText, height: 65, barWidth: 3);
+            if (string.IsNullOrEmpty(label.BarcodeSvg))
+            {
+                label.BarcodeSvg = _qrBarcodeService.GenerateBarcodeSvg(barcodeText, height: 65, barWidth: 3);
+            }
 
             // QR Code: ONLY the AWB Number value and nothing more (e.g. "VL0085889669704")
             string qrData = !string.IsNullOrWhiteSpace(label.AWBNumber) ? label.AWBNumber.Trim() : (label.OrderNo ?? "").Trim();
             label.QRCodeData = qrData;
 
-            label.QrCodeBase64 = _qrBarcodeService.GenerateQrCodePngBase64(qrData, pixelsPerModule: 10);
-            label.QrCodeSvg = _qrBarcodeService.GenerateQrCodeSvg(qrData, pixelsPerModule: 6);
+            if (string.IsNullOrEmpty(label.QrCodeBase64))
+            {
+                label.QrCodeBase64 = _qrBarcodeService.GenerateQrCodePngBase64(qrData, pixelsPerModule: 10);
+            }
+            if (string.IsNullOrEmpty(label.QrCodeSvg))
+            {
+                label.QrCodeSvg = _qrBarcodeService.GenerateQrCodeSvg(qrData, pixelsPerModule: 6);
+            }
         }
     }
 }
