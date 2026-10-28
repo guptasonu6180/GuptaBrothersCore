@@ -5,6 +5,12 @@
     int totalItems = ViewBag.TotalItems ?? 0;
     decimal totalAmount = ViewBag.TotalAmount ?? 0m;
     decimal totalTaxes = ViewBag.TotalTaxes ?? 0m;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 50;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    string searchTerm = ViewBag.SearchTerm as string ?? "";
+    int startRow = totalCount == 0 ? 0 : (pageSize == -1 ? 1 : (currentPage - 1) * pageSize + 1);
+    int endRow = pageSize == -1 ? totalCount : Math.Min(currentPage * pageSize, totalCount);
 }
 
 <div class="container-fluid px-0">
@@ -47,7 +53,7 @@
             <div class="kpi-card-futuristic card-purple">
                 <div>
                     <span class="kpi-label-purple">Total Taxes (GST)</span>
-                    <h2 class="kpi-value-currency">₹@totalTaxes.ToString("N2")</h2>
+                    <h2 class="kpi-value-currency">&#8377;@totalTaxes.ToString("N2")</h2>
                     <span class="kpi-badge-purple">
                         <i class="bi bi-percent me-1"></i>3.0% IGST / GST
                     </span>
@@ -63,7 +69,7 @@
             <div class="kpi-card-futuristic card-amber">
                 <div>
                     <span class="kpi-label-amber">Total Invoice Value</span>
-                    <h2 class="kpi-value-currency">₹@totalAmount.ToString("N2")</h2>
+                    <h2 class="kpi-value-currency">&#8377;@totalAmount.ToString("N2")</h2>
                     <span class="kpi-badge-amber">
                         <i class="bi bi-currency-rupee me-1"></i>Combined Total
                     </span>
@@ -78,7 +84,7 @@
     <!-- Action Toolbar Card: Brand Logo near filter + Compact small buttons with hover tooltips -->
     <div class="toolbar-card">
         <div class="row g-2 align-items-center">
-            <!-- Filter Group: Gupta Brothers Logo near Filter + Instant Live Search -->
+            <!-- Filter Group: Gupta Brothers Logo near Filter + Search -->
             <div class="col-12 col-xl-5 col-lg-5">
                 <div class="d-flex align-items-center gap-2">
                     <div class="toolbar-filter-logo" data-bs-toggle="tooltip" data-bs-placement="top" title="Gupta Brothers Shipping System">
@@ -89,12 +95,15 @@
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" id="liveSearchInput" class="form-control search-input-field" 
-                               placeholder="Filter by AWB, Order No, Customer, SKU, City..." 
-                               value="@ViewBag.SearchTerm" onkeyup="filterTableLive()" />
+                               placeholder="Filter by AWB, Order ID, Customer, Hub, City..." 
+                               value="@searchTerm" />
                         <button class="btn search-clear-btn" type="button" onclick="clearLiveSearch()" data-bs-toggle="tooltip" data-bs-placement="top" title="Clear filter text">
                             <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
+                    <button class="btn btn-action-pill btn-pill-outline btn-sm" type="button" onclick="performSearch()" title="Search">
+                        <i class="bi bi-arrow-right"></i> Search
+                    </button>
                 </div>
             </div>
 
@@ -106,7 +115,7 @@
                 </button>
 
                 <!-- 2. Sample Template -->
-                <a asp-action="DownloadTemplate" class="btn btn-action-pill btn-pill-emerald" data-bs-toggle="tooltip" data-bs-placement="top" title="Download fixed format 14-column Excel template">
+                <a asp-action="DownloadTemplate" class="btn btn-action-pill btn-pill-emerald" data-bs-toggle="tooltip" data-bs-placement="top" title="Download final 7-column Excel template">
                     <i class="bi bi-file-earmark-excel"></i> Template
                 </a>
 
@@ -121,7 +130,7 @@
                 </a>
 
                 <!-- 4. Print All Labels -->
-                <a asp-action="Print" target="_blank" class="btn btn-action-pill btn-pill-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Print thermal half shipping labels for all orders">
+                <a asp-action="Print" target="_blank" class="btn btn-action-pill btn-pill-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Print thermal shipping labels for all orders">
                     <i class="bi bi-printer-fill"></i> Print All <span class="badge bg-secondary ms-1">@totalCount</span>
                 </a>
 
@@ -147,7 +156,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3">
                         <li>
-                            <form asp-action="ResetSample" method="post" onsubmit="return confirm('Reset all records to Gupta Brothers 7 default sample orders?');">
+                            <form asp-action="ResetSample" method="post" onsubmit="return confirm('Reset all records to Gupta Brothers default sample orders?');">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="dropdown-item py-2">
                                     <i class="bi bi-arrow-counterclockwise me-2 text-info"></i> Reset to Sample Data
@@ -179,7 +188,7 @@
                 <h6 class="table-header-title">
                     Gupta Brothers Shipping Records
                 </h6>
-                <span class="badge rounded-pill bg-light text-dark border ms-1" id="tableItemCountBadge">@Model.Count labels</span>
+                <span class="badge rounded-pill bg-light text-dark border ms-1" id="tableItemCountBadge">@totalCount labels</span>
             </div>
             <div class="small text-muted">
                 <i class="bi bi-qr-code-scan me-1 text-primary"></i> Click any <strong>QR Code</strong> to inspect in high resolution.
@@ -191,14 +200,13 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 44px; min-width: 44px;">
-                            <input type="checkbox" id="chkSelectAll" class="form-check-input" onchange="toggleSelectAll(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="Select all orders" />
+                            <input type="checkbox" id="chkSelectAll" class="form-check-input" onchange="toggleSelectAll(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="Select/Deselect visible rows" />
                         </th>
-                        <th style="width: 210px; min-width: 210px;">AWB / TRACKING &amp; BARCODE</th>
-                        <th style="width: 270px; min-width: 270px;">ORDER &amp; INVOICE</th>
-                        <th style="width: 330px; min-width: 330px;">CUSTOMER &amp; DESTINATION</th>
-                        <th style="width: 370px; min-width: 370px;">PRODUCT / SKU</th>
-                        <th class="text-center" style="width: 65px; min-width: 65px;">QTY</th>
-                        <th style="width: 140px; min-width: 140px;">TOTAL (INR)</th>
+                        <th style="width: 220px; min-width: 220px;">AWB / TRACKING &amp; BARCODE</th>
+                        <th style="width: 260px; min-width: 260px;">ORDER DETAILS</th>
+                        <th style="width: 320px; min-width: 320px;">CUSTOMER &amp; DESTINATION</th>
+                        <th style="width: 320px; min-width: 320px;">SELLER &amp; RETURN STORE</th>
+                        <th class="text-center" style="width: 60px; min-width: 60px;">QTY</th>
                         <th class="text-center" style="width: 90px; min-width: 90px;">QR CODE</th>
                         <th class="text-end pe-3" style="width: 215px; min-width: 215px;">ACTIONS</th>
                     </tr>
@@ -207,9 +215,9 @@
                     @if (Model.Count == 0)
                     {
                         <tr id="noRecordsRow">
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox display-4 d-block mb-3 text-secondary"></i>
-                                <h6 class="fw-bold">No shipping labels loaded</h6>
+                                <h6 class="fw-bold">No shipping labels found</h6>
                                 <p class="text-muted small mb-3">Upload your Excel file or load Gupta Brothers demo data to start printing.</p>
                                 <button type="button" class="btn btn-action-pill btn-pill-primary px-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
                                     <i class="bi bi-file-earmark-arrow-up"></i> Upload Excel
@@ -227,71 +235,87 @@
                     {
                         @foreach (var item in Model)
                         {
-                            <tr class="label-row" data-search-target="@item.AWBNumber @item.OrderNo @item.CustomerName @item.CustomerCity @item.CustomerState @item.SKU @item.InvoiceNo">
+                            <tr class="label-row" data-search-target="@item.AWBNumber @item.OrderNo @item.CustomerName @item.CustomerCity @item.CustomerState @item.CustomerPincode @item.ReturnCompanyName @item.SoldBy @item.SellerAddress @item.HubCode">
                                 <td class="text-center">
-                                    <input type="checkbox" class="form-check-input chkRow" value="@item.Id" onchange="updateSelectedCount()" />
+                                    <input type="checkbox" class="form-check-input chkRow" value="@item.Id" />
                                 </td>
                                 <td>
                                     <div class="fw-bold text-dark font-monospace" style="font-size: 0.92rem;">@item.AWBNumber</div>
                                     <div class="d-flex align-items-center gap-1 my-1">
                                         <span class="badge bg-dark" style="font-size: 0.65rem;">@item.CourierName</span>
                                         <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">@item.PickupDateBadge</span>
-                                        <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">@item.HubCode</span>
+                                        <span class="badge bg-primary text-white" style="font-size: 0.65rem;">@item.HubCode</span>
                                     </div>
                                     <div class="barcode-cell-container">
                                         @Html.Raw(item.BarcodeSvg)
                                     </div>
                                 </td>
                                 <td>
-                                    <!-- Full 20-digit Order Number (NO ellipses truncation) -->
+                                    <!-- Full Order Number -->
                                     <div class="order-no-text">
                                         @item.OrderNo
                                     </div>
                                     <div class="small text-muted mt-1" style="font-size: 0.78rem;">
-                                        Inv: <span class="fw-semibold text-dark font-monospace">@item.InvoiceNo</span>
+                                        PO: <span class="fw-semibold text-dark font-monospace">@item.PurchaseOrderNo</span>
                                     </div>
-                                    <div class="small text-secondary" style="font-size: 0.74rem;">
-                                        Date: @item.OrderDate
+                                    <div class="mt-1">
+                                        <span class="badge @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-warning text-dark")" style="font-size: 0.65rem;">
+                                            @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "Prepaid" : "COD / App")
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
                                     <!-- Full Customer Name and Complete Destination Address -->
                                     <div class="customer-name-text">@item.CustomerName</div>
                                     <div class="customer-address-full">
-                                        @item.CustomerAddressLine1
+                                        @if (!string.IsNullOrWhiteSpace(item.CustomerAddressLine1))
+                                        {
+                                            <span>@item.CustomerAddressLine1</span>
+                                        }
                                         @if (!string.IsNullOrWhiteSpace(item.CustomerAddressLine2))
                                         {
                                             <span>, @item.CustomerAddressLine2</span>
                                         }
-                                        <span>, @item.CustomerCity</span>
                                     </div>
-                                    <div class="small text-secondary mt-1" style="font-size: 0.76rem;">
-                                        <strong>@item.CustomerState</strong> - @item.CustomerPincode
-                                    </div>
+                                    @{
+                                        var locParts = new List<string>();
+                                        if (!string.IsNullOrWhiteSpace(item.CustomerCity)) locParts.Add(item.CustomerCity.Trim());
+                                        if (!string.IsNullOrWhiteSpace(item.CustomerState) && !string.Equals(item.CustomerState.Trim(), item.CustomerCity?.Trim(), StringComparison.OrdinalIgnoreCase)) locParts.Add(item.CustomerState.Trim());
+                                        if (!string.IsNullOrWhiteSpace(item.CustomerPincode)) locParts.Add(item.CustomerPincode.Trim());
+                                    }
+                                    @if (locParts.Count > 0)
+                                    {
+                                        <div class="small text-secondary mt-1" style="font-size: 0.76rem;">
+                                            <strong>@string.Join(", ", locParts)</strong>
+                                        </div>
+                                    }
                                 </td>
                                 <td>
-                                    <!-- Full Product Details, SKU, Description, and Variations -->
-                                    <div>
-                                        <span class="product-sku-badge">@item.SKU</span>
+                                    <!-- Full Seller Name and Seller Address -->
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">
+                                        @(string.IsNullOrWhiteSpace(item.ReturnCompanyName) ? item.SoldBy : item.ReturnCompanyName)
                                     </div>
-                                    <div class="product-desc-full">
-                                        @item.ItemDescription
-                                    </div>
-                                    <div class="small text-secondary mt-1" style="font-size: 0.74rem;">
-                                        Size: <span class="fw-medium text-dark">@item.Size</span> | Color: <span class="fw-medium text-dark">@item.Color</span>
+                                    <div class="customer-address-full" style="font-size: 0.76rem; color: #475569;">
+                                        @if (!string.IsNullOrWhiteSpace(item.ReturnAddressLine1))
+                                        {
+                                            <span>@item.ReturnAddressLine1</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.ReturnAddressLine2))
+                                        {
+                                            <span>, @item.ReturnAddressLine2</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.ReturnArea))
+                                        {
+                                            <span>, @item.ReturnArea</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.ReturnCityStatePin))
+                                        {
+                                            <div class="text-muted mt-1">@item.ReturnCityStatePin</div>
+                                        }
                                     </div>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-secondary rounded-pill px-2 py-1" style="font-size: 0.75rem;">@item.Qty</span>
-                                </td>
-                                <td>
-                                    <div class="fw-bold text-success" style="font-size: 0.95rem;">₹@item.GrandTotal.ToString("N2")</div>
-                                    <div class="text-muted" style="font-size: 0.72rem;">
-                                        Tax: ₹@item.TotalTaxes.ToString("N2")
-                                    </div>
-                                    <span class="badge @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-warning text-dark")" style="font-size: 0.65rem;">
-                                        @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "Prepaid" : "COD / Collect")
-                                    </span>
                                 </td>
                                 <td class="text-center">
                                     <!-- Base64 PNG QR Code Thumbnail with Zoom Modal -->
@@ -345,6 +369,45 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- High-Performance Pagination & Selection Control Bar -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 py-2 border-top bg-light rounded-bottom-4">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="small text-muted fw-semibold">Rows per page:</span>
+                <select id="pageSizeSelect" class="form-select form-select-sm" style="width: 90px;" onchange="changePageSize(this.value)">
+                    <!option value="25" @(pageSize == 25 ? "selected" : "")>25</!option>
+                    <!option value="50" @(pageSize == 50 ? "selected" : "")>50</!option>
+                    <!option value="100" @(pageSize == 100 ? "selected" : "")>100</!option>
+                    <!option value="250" @(pageSize == 250 ? "selected" : "")>250</!option>
+                    <!option value="500" @(pageSize == 500 ? "selected" : "")>500</!option>
+                    <!option value="-1" @(pageSize == -1 ? "selected" : "")>All</!option>
+                </select>
+                <span class="small text-muted fw-semibold" id="paginationRangeText">Showing @startRow-@endRow of @totalCount</span>
+                <span class="text-secondary small">|</span>
+                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small" onclick="selectAllAcrossEntireDatabase()">
+                    Select All (@totalCount)
+                </button>
+                <span class="text-secondary small">|</span>
+                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-muted small" onclick="clearAllSelections()">
+                    Clear Selection
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-1" id="paginationButtons">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @(currentPage <= 1 ? "disabled" : "") onclick="goToPage(1)" title="First Page">
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @(currentPage <= 1 ? "disabled" : "") onclick="goToPage(@(currentPage - 1))" title="Previous Page">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <span class="px-2 small fw-bold text-dark font-monospace" id="pageIndicatorText">Page @currentPage of @totalPages</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @(currentPage >= totalPages ? "disabled" : "") onclick="goToPage(@(currentPage + 1))" title="Next Page">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @(currentPage >= totalPages ? "disabled" : "") onclick="goToPage(@totalPages)" title="Last Page">
+                    <i class="bi bi-chevron-double-right"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -378,7 +441,7 @@
                     <span class="fw-semibold text-dark font-monospace small" id="qrModalOrder"></span>
                 </div>
                 <div class="d-flex justify-content-between">
-                    <span class="text-muted small">Customer & City:</span>
+                    <span class="text-muted small">Customer &amp; City:</span>
                     <span class="fw-semibold text-dark" id="qrModalCustomer"></span>
                 </div>
             </div>
@@ -398,6 +461,14 @@
 
 @section Scripts {
 <script>
+    var serverCurrentPage = @currentPage;
+    var serverPageSize = @pageSize;
+    var serverTotalPages = @totalPages;
+    var serverTotalCount = @totalCount;
+    var currentSearch = '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(searchTerm))';
+    var selectedIds = new Set();
+    var allSelectedMode = false;
+
     function initTooltips() {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.forEach(function (tooltipTriggerEl) {
@@ -405,68 +476,133 @@
         });
     }
 
-    $(document).ready(function () {
-        initTooltips();
+    function navigate(p, s, q) {
+        var params = new URLSearchParams();
+        params.set('page', p);
+        params.set('pageSize', s);
+        if (q && q.trim()) params.set('search', q.trim());
+        window.location.href = '@Url.Action("Index", "ShippingLabel")?' + params.toString();
+    }
+
+    function changePageSize(val) {
+        navigate(1, val, currentSearch);
+    }
+
+    function goToPage(p) {
+        if (p < 1) p = 1;
+        if (p > serverTotalPages) p = serverTotalPages;
+        navigate(p, serverPageSize, currentSearch);
+    }
+
+    function performSearch() {
+        var q = $('#liveSearchInput').val();
+        navigate(1, serverPageSize, q);
+    }
+
+    function clearLiveSearch() {
+        $('#liveSearchInput').val('');
+        navigate(1, serverPageSize, '');
+    }
+
+    $('#liveSearchInput').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
     });
 
     function toggleSelectAll(master) {
-        $('.chkRow').prop('checked', master.checked);
+        var isChecked = master.checked;
+        $('.chkRow').each(function () {
+            this.checked = isChecked;
+            if (isChecked) {
+                selectedIds.add(this.value);
+            } else {
+                selectedIds.delete(this.value);
+            }
+        });
+        allSelectedMode = false;
+        updateSelectedCount();
+    }
+
+    function selectAllAcrossEntireDatabase() {
+        allSelectedMode = true;
+        $('.chkRow').prop('checked', true);
+        var master = document.getElementById('chkSelectAll');
+        if (master) master.checked = true;
+        updateSelectedCount();
+    }
+
+    function clearAllSelections() {
+        allSelectedMode = false;
+        selectedIds.clear();
+        $('.chkRow').prop('checked', false);
+        var master = document.getElementById('chkSelectAll');
+        if (master) {
+            master.checked = false;
+            master.indeterminate = false;
+        }
         updateSelectedCount();
     }
 
     function updateSelectedCount() {
-        var count = $('.chkRow:checked').length;
+        var count = allSelectedMode ? serverTotalCount : selectedIds.size;
         $('#selectedCountBadge').text(count);
         $('#btnPrintSelected').prop('disabled', count === 0);
         $('#btnExportSelectedPdf').prop('disabled', count === 0);
     }
 
-    function printSelectedLabels() {
-        var selectedIds = [];
-        $('.chkRow:checked').each(function () {
-            selectedIds.push($(this).val());
-        });
-        if (selectedIds.length === 0) {
-            alert('Please select at least one shipping label to print.');
+    $(document).on('change', '.chkRow', function () {
+        var val = $(this).val();
+        if (this.checked) {
+            selectedIds.add(val);
+        } else {
+            selectedIds.delete(val);
+            allSelectedMode = false;
+        }
+        updateSelectedCount();
+    });
+
+    function submitSelectedForm(actionUrl, target) {
+        if (!allSelectedMode && selectedIds.size === 0) {
+            alert('Please select at least one shipping label.');
             return;
         }
-        var url = '@Url.Action("Print", "ShippingLabel")?ids=' + encodeURIComponent(selectedIds.join(','));
-        window.open(url, '_blank');
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = actionUrl;
+        if (target) form.target = target;
+
+        var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (tokenInput) {
+            var hiddenToken = document.createElement('input');
+            hiddenToken.type = 'hidden';
+            hiddenToken.name = '__RequestVerificationToken';
+            hiddenToken.value = tokenInput.value;
+            form.appendChild(hiddenToken);
+        }
+
+        var idsInput = document.createElement('input');
+        idsInput.type = 'hidden';
+        idsInput.name = 'ids';
+        if (allSelectedMode) {
+            idsInput.value = ''; // all in database
+        } else {
+            idsInput.value = Array.from(selectedIds).join(',');
+        }
+        form.appendChild(idsInput);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+
+    function printSelectedLabels() {
+        submitSelectedForm('@Url.Action("Print", "ShippingLabel")', '_blank');
     }
 
     function exportSelectedPdf() {
-        var selectedIds = [];
-        $('.chkRow:checked').each(function () {
-            selectedIds.push($(this).val());
-        });
-        if (selectedIds.length === 0) {
-            alert('Please select at least one shipping label to export.');
-            return;
-        }
-        window.location.href = '@Url.Action("ExportPdf", "ShippingLabel")?ids=' + encodeURIComponent(selectedIds.join(','));
-    }
-
-    // Client-side real-time live search
-    function filterTableLive() {
-        var query = $('#liveSearchInput').val().toLowerCase().trim();
-        var visibleCount = 0;
-        
-        $('.label-row').each(function () {
-            var target = $(this).attr('data-search-target').toLowerCase();
-            if (query === '' || target.indexOf(query) !== -1) {
-                $(this).show();
-                visibleCount++;
-            } else {
-                $(this).hide();
-            }
-        });
-
-        $('#tableItemCountBadge').text(visibleCount + ' labels');
-    }
-
-    function clearLiveSearch() {
-        $('#liveSearchInput').val('');
-        filterTableLive();
+        submitSelectedForm('@Url.Action("ExportPdf", "ShippingLabel")', '_self');
     }
 
     function showQrModal(awb, orderNo, customer, city, imgSrc) {
@@ -477,5 +613,10 @@
         $('#btnDownloadQr').attr('href', imgSrc).attr('download', 'QR_' + awb + '.png');
         $('#qrZoomModal').modal('show');
     }
+
+    $(document).ready(function () {
+        initTooltips();
+        updateSelectedCount();
+    });
 </script>
 }

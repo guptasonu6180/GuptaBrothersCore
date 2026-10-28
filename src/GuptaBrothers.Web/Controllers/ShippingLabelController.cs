@@ -29,8 +29,11 @@ namespace GuptaBrothers.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(string? search)
+        public IActionResult Index(string? search, int page = 1, int pageSize = 50)
         {
+            if (page < 1) page = 1;
+            if (pageSize <= 0 && pageSize != -1) pageSize = 50;
+
             ViewBag.SearchTerm = search;
             var list = _labelService.GetAll(search);
 
@@ -39,7 +42,24 @@ namespace GuptaBrothers.Web.Controllers
             ViewBag.TotalAmount = list.Sum(x => x.GrandTotal);
             ViewBag.TotalTaxes = list.Sum(x => x.TotalTaxes);
 
-            return View(list);
+            int totalRecords = list.Count;
+            bool showAll = (pageSize == -1 || pageSize >= totalRecords);
+            int totalPages = showAll ? 1 : (int)Math.Ceiling((double)totalRecords / pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var pagedList = showAll
+                ? list
+                : list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            // Populate QR & Barcode dynamically for the visible records
+            Parallel.ForEach(pagedList, item => _labelService.EnsureQrAndBarcode(item));
+
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+
+            return View(pagedList);
         }
 
         [HttpGet]
@@ -99,13 +119,14 @@ namespace GuptaBrothers.Web.Controllers
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
         }
 
-        [HttpGet]
+        [HttpGet, HttpPost]
         public IActionResult ExportPdf(string? ids)
         {
             List<ShippingLabelModel> labels;
             if (string.IsNullOrWhiteSpace(ids))
             {
                 labels = _labelService.GetAll();
+                Parallel.ForEach(labels, item => _labelService.EnsureQrAndBarcode(item));
             }
             else
             {
@@ -142,13 +163,14 @@ namespace GuptaBrothers.Web.Controllers
             return File(pdfBytes, "application/pdf", filename);
         }
 
-        [HttpGet]
+        [HttpGet, HttpPost]
         public IActionResult Print(string? ids)
         {
             List<ShippingLabelModel> labels;
             if (string.IsNullOrWhiteSpace(ids))
             {
                 labels = _labelService.GetAll();
+                Parallel.ForEach(labels, item => _labelService.EnsureQrAndBarcode(item));
             }
             else
             {

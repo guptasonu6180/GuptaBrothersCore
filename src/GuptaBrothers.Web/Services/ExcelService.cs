@@ -12,20 +12,28 @@ namespace GuptaBrothers.Web.Services
     {
         private static readonly string[] TemplateHeaders = new string[]
         {
-            "Date",
-            "Customer Name",
-            "Customer Address",
-            "Return / Seller Name",
-            "Return / Seller Address",
-            "UFC Name",
-            "Web QR Code Text",
-            "Tracking Number",
+            "WaybillNumber",
+            "SELLER NAME",
+            "SELLER Address",
+            "CUSTOMER NAME",
+            "CUSTOMER Address",
+            "ORDER ID",
+            "HUB CODE"
+        };
+
+        private static readonly string[] ExportHeaders = new string[]
+        {
+            "WaybillNumber",
+            "SELLER NAME",
+            "SELLER Address",
+            "CUSTOMER NAME",
+            "CUSTOMER Address",
+            "ORDER ID",
+            "HUB CODE",
             "SKU",
-            "Size",
             "Qty",
-            "Color",
-            "Order No",
-            "Payment Instruction"
+            "Size",
+            "Color"
         };
 
         public byte[] GenerateSampleTemplate()
@@ -35,7 +43,7 @@ namespace GuptaBrothers.Web.Services
 
             // Row 1: Header Title
             var titleCell = worksheet.Cell(1, 1);
-            titleCell.Value = "Shipping Label Data Export";
+            titleCell.Value = "Gupta Brothers - Standard Shipping Import Template";
             worksheet.Range(1, 1, 1, TemplateHeaders.Length).Merge();
             titleCell.Style.Font.Bold = true;
             titleCell.Style.Font.FontSize = 14;
@@ -47,7 +55,7 @@ namespace GuptaBrothers.Web.Services
 
             // Row 2: Subtitle
             var subCell = worksheet.Cell(2, 1);
-            subCell.Value = "Extracted from Shipping Label | Courier: Valmo Pickup";
+            subCell.Value = "Final Format for E-Commerce Logistics Import & Thermal Label Generation";
             worksheet.Range(2, 1, 2, TemplateHeaders.Length).Merge();
             subCell.Style.Font.FontSize = 10;
             subCell.Style.Font.FontColor = XLColor.FromHtml("#cbd5e1");
@@ -73,69 +81,46 @@ namespace GuptaBrothers.Web.Services
             }
             worksheet.Row(4).Height = 26;
 
-            // Row 5+: Sample Rows
-            var sampleRows = GetSampleRecords();
+            // Row 5+: Sample Rows matching final user structure
+            var sampleRows = new[]
+            {
+                ("VL0085922256396", "KB ENTERPRISE_", "82, Kamal Park (Shanti Niketan) Society, Near Gujarat Shopping Center, Sagar Road, L H Road, Kapodra, Surat, Gujarat, Pincode 395006,", "Vidyanand Kumar", "145 mihinpurwa post matehi , garam karmohna kaloni", "1832838282368_1", "UFC"),
+                ("VL0085922144939", "KHODIYAR ENTERPRISE", "82, Kamal Park (Shanti Niketan) Society, Near Gujarat Shopping Center, Sagar Road, L H Road, Kapodra, Surat, Gujarat, Pincode 395006,", "Sandhiya Murugan", "55,pasandi pasandi vill", "1832838282368_2", "UFC"),
+                ("VL0085926883840", "MATRUKRUPA ENTERPRISE", "54, KAMAL PARK SOCIETY (SHANTI NIKETAN), OPP. SAGAR SOCIETY, NEAR GUJRAT SHOPPING CENTER, SURAT, GUJARAT, PINCODE 395006,", "guurfebrjdhjdtjvsgb", "guegtkf6hduuhcjhfhugf Pratap Nagar, Jai Bheem Nagar, Meerut, Meerut District, Meerut", "1832838282368_3", "UFC"),
+                ("VL0085922144756", "KHODIYAR ENTERPRISE", "82, Kamal Park (Shanti Niketan) Society, Near Gujarat Shopping Center, Sagar Road, L H Road, Kapodra, Surat, Gujarat, Pincode 395006,", "syed", "9 3 58/ak/1 Afsar Khan Colony, Golconda, Golconda, Hyderabad District, Hyderabad", "1832838282368_4", "UFC"),
+                ("VL0085927359976", "SHIV_.ENTERPRISE", "54, F/F, Kamal Park Society (Shanti Niketan), Opp. Sagar Society, Surat, Gujarat, Pincode 395006,", "reshma", "MTNL Building Sea Lord, Cuffe Parade, GD Somani Marg, Mumbai, Mumbai District, Mumbai", "1832838282368_6", "UFC"),
+                ("VL0085924062713", "PRAMUKH_FASHION", "82, KAMAL PARK ( SHANTI NIKETAN ) SOCIETY, NEAR GUJRAT SHOPPING CENTER, SAGAR ROAD, L H ROAD, KAPODRA, SURAT, GUJARAT, PINCODE 395006,", "khushi", "D 45 sewak park dwarka mod uttam nagar 110059 near madina masjid madarsa lane", "1832838282368_23", "UFC"),
+                ("VL0085927589577", "GREEVA ENTERPRISE_", "54, F/F, KAMAL PARK SOCIETY (SHANTI NIKETAN), OPP. SAGAR SOCIETY, SURAT, GUJARAT, PINCODE 395006 ,", "Jyoti", "168/2 Shagun Chand Ahata, Sadar Bazar, Grand Trunk Road, Ambala, Ambala District, Ambala", "1832838282368_22", "UFC")
+            };
+
             int rowIdx = 5;
             foreach (var item in sampleRows)
             {
                 var r = worksheet.Row(rowIdx);
-                r.Height = 48;
+                r.Height = 42;
 
-                // 1. Date
-                r.Cell(1).SetValue(item.PickupDateBadge);
+                r.Cell(1).SetValue(item.Item1); // WaybillNumber
+                r.Cell(1).Style.Font.Bold = true;
                 r.Cell(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // 2. Customer Name
-                r.Cell(2).SetValue(item.CustomerName);
+                r.Cell(2).SetValue(item.Item2); // SELLER NAME
                 r.Cell(2).Style.Font.Bold = true;
 
-                // 3. Customer Address
-                r.Cell(3).SetValue(FormatCustomerAddress(item));
+                r.Cell(3).SetValue(item.Item3); // SELLER Address
                 r.Cell(3).Style.Alignment.WrapText = true;
 
-                // 4. Return / Seller Name
-                r.Cell(4).SetValue(string.IsNullOrWhiteSpace(item.ReturnCompanyName) ? item.SoldBy : item.ReturnCompanyName);
+                r.Cell(4).SetValue(item.Item4); // CUSTOMER NAME
+                r.Cell(4).Style.Font.Bold = true;
 
-                // 5. Return / Seller Address
-                r.Cell(5).SetValue(FormatReturnAddress(item));
+                r.Cell(5).SetValue(item.Item5); // CUSTOMER Address
                 r.Cell(5).Style.Alignment.WrapText = true;
 
-                // 6. UFC Name
-                r.Cell(6).SetValue(item.HubCode);
+                r.Cell(6).SetValue(item.Item6); // ORDER ID
                 r.Cell(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                r.Cell(6).Style.Font.Bold = true;
 
-                // 7. Web QR Code Text (multiline)
-                r.Cell(7).SetValue(FormatWebQrText(item));
-                r.Cell(7).Style.Alignment.WrapText = true;
+                r.Cell(7).SetValue(item.Item7); // HUB CODE
                 r.Cell(7).Style.Font.Bold = true;
-
-                // 8. Tracking Number
-                r.Cell(8).SetValue(item.AWBNumber);
-                r.Cell(8).Style.Font.Bold = true;
-                r.Cell(8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // 9. SKU
-                r.Cell(9).SetValue(item.SKU);
-                r.Cell(9).Style.Font.Bold = true;
-
-                // 10. Size
-                r.Cell(10).SetValue(item.Size);
-                r.Cell(10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // 11. Qty
-                r.Cell(11).SetValue(item.Qty);
-                r.Cell(11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // 12. Color
-                r.Cell(12).SetValue(item.Color);
-                r.Cell(12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // 13. Order No
-                r.Cell(13).SetValue(item.OrderNo);
-
-                // 14. Payment Instruction
-                r.Cell(14).SetValue(item.PaymentStatus);
+                r.Cell(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 for (int c = 1; c <= TemplateHeaders.Length; c++)
                 {
@@ -147,21 +132,14 @@ namespace GuptaBrothers.Web.Services
                 rowIdx++;
             }
 
-            // Fixed Proportional Column Widths matching sample template
-            worksheet.Column(1).Width = 12;   // Date
-            worksheet.Column(2).Width = 20;   // Customer Name
-            worksheet.Column(3).Width = 40;   // Customer Address
-            worksheet.Column(4).Width = 24;   // Return / Seller Name
-            worksheet.Column(5).Width = 45;   // Return / Seller Address
-            worksheet.Column(6).Width = 14;   // UFC Name
-            worksheet.Column(7).Width = 18;   // Web QR Code Text
-            worksheet.Column(8).Width = 22;   // Tracking Number
-            worksheet.Column(9).Width = 32;   // SKU
-            worksheet.Column(10).Width = 14;  // Size
-            worksheet.Column(11).Width = 10;  // Qty
-            worksheet.Column(12).Width = 14;  // Color
-            worksheet.Column(13).Width = 26;  // Order No
-            worksheet.Column(14).Width = 36;  // Payment Instruction
+            // Fixed Proportional Column Widths
+            worksheet.Column(1).Width = 24;  // WaybillNumber
+            worksheet.Column(2).Width = 28;  // SELLER NAME
+            worksheet.Column(3).Width = 48;  // SELLER Address
+            worksheet.Column(4).Width = 24;  // CUSTOMER NAME
+            worksheet.Column(5).Width = 48;  // CUSTOMER Address
+            worksheet.Column(6).Width = 24;  // ORDER ID
+            worksheet.Column(7).Width = 14;  // HUB CODE
 
             using var memoryStream = new MemoryStream();
             workbook.SaveAs(memoryStream);
@@ -175,8 +153,8 @@ namespace GuptaBrothers.Web.Services
 
             // Row 1: Header Title
             var titleCell = worksheet.Cell(1, 1);
-            titleCell.Value = "Shipping Label Data Export";
-            worksheet.Range(1, 1, 1, TemplateHeaders.Length).Merge();
+            titleCell.Value = "Gupta Brothers - Shipping Label Data Export";
+            worksheet.Range(1, 1, 1, ExportHeaders.Length).Merge();
             titleCell.Style.Font.Bold = true;
             titleCell.Style.Font.FontSize = 14;
             titleCell.Style.Font.FontColor = XLColor.White;
@@ -188,7 +166,7 @@ namespace GuptaBrothers.Web.Services
             // Row 2: Subtitle
             var subCell = worksheet.Cell(2, 1);
             subCell.Value = "Extracted from Shipping Label | Courier: Valmo Pickup";
-            worksheet.Range(2, 1, 2, TemplateHeaders.Length).Merge();
+            worksheet.Range(2, 1, 2, ExportHeaders.Length).Merge();
             subCell.Style.Font.FontSize = 10;
             subCell.Style.Font.FontColor = XLColor.FromHtml("#cbd5e1");
             subCell.Style.Fill.BackgroundColor = XLColor.FromHtml("#1e293b");
@@ -200,10 +178,10 @@ namespace GuptaBrothers.Web.Services
             worksheet.Row(3).Height = 8;
 
             // Row 4: Column Headers
-            for (int col = 0; col < TemplateHeaders.Length; col++)
+            for (int col = 0; col < ExportHeaders.Length; col++)
             {
                 var cell = worksheet.Cell(4, col + 1);
-                cell.Value = TemplateHeaders[col];
+                cell.Value = ExportHeaders[col];
                 cell.Style.Font.Bold = true;
                 cell.Style.Font.FontSize = 10.5;
                 cell.Style.Font.FontColor = XLColor.White;
@@ -217,65 +195,52 @@ namespace GuptaBrothers.Web.Services
             foreach (var item in labels)
             {
                 var r = worksheet.Row(rowIdx);
-                r.Height = 48;
+                r.Height = 36;
 
-                // 1. Date
-                r.Cell(1).SetValue(item.PickupDateBadge);
+                // 1. WaybillNumber
+                r.Cell(1).SetValue(item.AWBNumber);
+                r.Cell(1).Style.Font.Bold = true;
                 r.Cell(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // 2. Customer Name
-                r.Cell(2).SetValue(item.CustomerName);
-                r.Cell(2).Style.Font.Bold = true;
+                // 2. SELLER NAME
+                r.Cell(2).SetValue(string.IsNullOrWhiteSpace(item.ReturnCompanyName) ? item.SoldBy : item.ReturnCompanyName);
 
-                // 3. Customer Address
-                r.Cell(3).SetValue(FormatCustomerAddress(item));
+                // 3. SELLER Address
+                r.Cell(3).SetValue(FormatReturnAddress(item));
                 r.Cell(3).Style.Alignment.WrapText = true;
 
-                // 4. Return / Seller Name
-                r.Cell(4).SetValue(string.IsNullOrWhiteSpace(item.ReturnCompanyName) ? item.SoldBy : item.ReturnCompanyName);
+                // 4. CUSTOMER NAME
+                r.Cell(4).SetValue(item.CustomerName);
+                r.Cell(4).Style.Font.Bold = true;
 
-                // 5. Return / Seller Address
-                r.Cell(5).SetValue(FormatReturnAddress(item));
+                // 5. CUSTOMER Address
+                r.Cell(5).SetValue(FormatCustomerAddress(item));
                 r.Cell(5).Style.Alignment.WrapText = true;
 
-                // 6. UFC Name
-                r.Cell(6).SetValue(item.HubCode);
+                // 6. ORDER ID
+                r.Cell(6).SetValue(item.OrderNo);
                 r.Cell(6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                r.Cell(6).Style.Font.Bold = true;
 
-                // 7. Web QR Code Text
-                r.Cell(7).SetValue(FormatWebQrText(item));
-                r.Cell(7).Style.Alignment.WrapText = true;
-                r.Cell(7).Style.Font.Bold = true;
+                // 7. HUB CODE
+                r.Cell(7).SetValue(item.HubCode);
+                r.Cell(7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // 8. Tracking Number
-                r.Cell(8).SetValue(item.AWBNumber);
-                r.Cell(8).Style.Font.Bold = true;
-                r.Cell(8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                // 8. SKU
+                r.Cell(8).SetValue(item.SKU);
 
-                // 9. SKU
-                r.Cell(9).SetValue(item.SKU);
-                r.Cell(9).Style.Font.Bold = true;
+                // 9. Qty
+                r.Cell(9).SetValue(item.Qty);
+                r.Cell(9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 // 10. Size
                 r.Cell(10).SetValue(item.Size);
                 r.Cell(10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // 11. Qty
-                r.Cell(11).SetValue(item.Qty);
-                r.Cell(11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
-                // 12. Color
+                // 11. Color
                 r.Cell(12).SetValue(item.Color);
                 r.Cell(12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // 13. Order No
-                r.Cell(13).SetValue(item.OrderNo);
-
-                // 14. Payment Instruction
-                r.Cell(14).SetValue(item.PaymentStatus);
-
-                for (int c = 1; c <= TemplateHeaders.Length; c++)
+                for (int c = 1; c <= ExportHeaders.Length; c++)
                 {
                     r.Cell(c).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     r.Cell(c).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
@@ -285,20 +250,17 @@ namespace GuptaBrothers.Web.Services
                 rowIdx++;
             }
 
-            worksheet.Column(1).Width = 12;
-            worksheet.Column(2).Width = 20;
-            worksheet.Column(3).Width = 40;
-            worksheet.Column(4).Width = 24;
-            worksheet.Column(5).Width = 45;
-            worksheet.Column(6).Width = 14;
-            worksheet.Column(7).Width = 18;
-            worksheet.Column(8).Width = 22;
-            worksheet.Column(9).Width = 32;
-            worksheet.Column(10).Width = 14;
-            worksheet.Column(11).Width = 10;
-            worksheet.Column(12).Width = 14;
-            worksheet.Column(13).Width = 26;
-            worksheet.Column(14).Width = 36;
+            worksheet.Column(1).Width = 24;  // WaybillNumber
+            worksheet.Column(2).Width = 28;  // SELLER NAME
+            worksheet.Column(3).Width = 45;  // SELLER Address
+            worksheet.Column(4).Width = 24;  // CUSTOMER NAME
+            worksheet.Column(5).Width = 45;  // CUSTOMER Address
+            worksheet.Column(6).Width = 24;  // ORDER ID
+            worksheet.Column(7).Width = 14;  // HUB CODE
+            worksheet.Column(8).Width = 20;  // SKU
+            worksheet.Column(9).Width = 10;  // Qty
+            worksheet.Column(10).Width = 14; // Size
+            worksheet.Column(11).Width = 14; // Color
 
             using var memoryStream = new MemoryStream();
             workbook.SaveAs(memoryStream);
@@ -689,6 +651,16 @@ namespace GuptaBrothers.Web.Services
             if (lines.Length >= 3) label.RoutingLine3 = lines[2];
         }
 
+        private static readonly HashSet<string> KnownIndianStates = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+            "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+            "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+            "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", 
+            "West Bengal", "Delhi", "New Delhi", "Jammu and Kashmir", "Chandigarh", "Ladakh", "Puducherry",
+            "Daman and Diu", "Dadra and Nagar Haveli"
+        };
+
         private static void ParseCustomerAddress(string fullAddress, ShippingLabelModel label)
         {
             if (string.IsNullOrWhiteSpace(fullAddress)) return;
@@ -700,6 +672,16 @@ namespace GuptaBrothers.Web.Services
             if (pinMatch.Success)
             {
                 label.CustomerPincode = pinMatch.Value;
+            }
+
+            // Check if address explicitly contains any known state
+            foreach (var state in KnownIndianStates)
+            {
+                if (Regex.IsMatch(fullAddress, $@"\b{Regex.Escape(state)}\b", RegexOptions.IgnoreCase))
+                {
+                    label.CustomerState = state;
+                    break;
+                }
             }
 
             var parts = fullAddress.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
@@ -719,6 +701,13 @@ namespace GuptaBrothers.Web.Services
                 parts.RemoveAt(parts.Count - 1);
             }
 
+            // If last part is exactly the state, remove it from street parts
+            if (parts.Count > 1 && !string.IsNullOrWhiteSpace(label.CustomerState) && 
+                string.Equals(parts[parts.Count - 1], label.CustomerState, StringComparison.OrdinalIgnoreCase))
+            {
+                parts.RemoveAt(parts.Count - 1);
+            }
+
             if (parts.Count == 1)
             {
                 label.CustomerAddressLine1 = parts[0];
@@ -727,16 +716,6 @@ namespace GuptaBrothers.Web.Services
             {
                 label.CustomerAddressLine1 = parts[0];
                 label.CustomerAddressLine2 = parts[1];
-                var words = parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (words.Length == 1)
-                {
-                    label.CustomerCity = words[0];
-                }
-                else if (words.Length >= 2)
-                {
-                    label.CustomerCity = words[words.Length - 2];
-                    label.CustomerState = words[words.Length - 1];
-                }
             }
             else if (parts.Count == 3)
             {
@@ -747,13 +726,8 @@ namespace GuptaBrothers.Web.Services
             else
             {
                 label.CustomerAddressLine1 = parts[0];
-                label.CustomerAddressLine2 = string.Join(", ", parts.Skip(1).Take(parts.Count - 3));
-                if (string.IsNullOrWhiteSpace(label.CustomerAddressLine2))
-                {
-                    label.CustomerAddressLine2 = parts[1];
-                }
-                label.CustomerCity = parts[parts.Count - 2];
-                label.CustomerState = parts[parts.Count - 1];
+                label.CustomerAddressLine2 = string.Join(", ", parts.Skip(1).Take(parts.Count - 2));
+                label.CustomerCity = parts[parts.Count - 1];
             }
         }
 

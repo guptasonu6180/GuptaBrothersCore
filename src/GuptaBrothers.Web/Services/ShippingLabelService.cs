@@ -132,13 +132,6 @@ namespace GuptaBrothers.Web.Services
                 }
 
                 var list = query.OrderByDescending(x => x.CreatedAt).ToList();
-                foreach (var item in list)
-                {
-                    if (string.IsNullOrEmpty(item.BarcodeSvg) || string.IsNullOrEmpty(item.QrCodeBase64))
-                    {
-                        EnsureQrAndBarcode(item);
-                    }
-                }
                 return list;
             }
         }

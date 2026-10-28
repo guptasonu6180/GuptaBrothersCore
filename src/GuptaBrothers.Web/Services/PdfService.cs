@@ -38,6 +38,7 @@ namespace GuptaBrothers.Web.Services
             }
 
             // Ensure QR and Barcode are populated for every label
+            var qrBytesMap = new Dictionary<string, byte[]>();
             foreach (var item in labelList)
             {
                 if (string.IsNullOrEmpty(item.QrCodeBase64))
@@ -50,6 +51,18 @@ namespace GuptaBrothers.Web.Services
                 {
                     var barcodeText = !string.IsNullOrWhiteSpace(item.AWBNumber) ? item.AWBNumber.Trim() : (item.OrderNo ?? "").Trim();
                     item.BarcodeSvg = _qrBarcodeService.GenerateBarcodeSvg(barcodeText, height: 65, barWidth: 3);
+                }
+
+                if (!string.IsNullOrEmpty(item.QrCodeBase64))
+                {
+                    try
+                    {
+                        var base64 = item.QrCodeBase64;
+                        var commaIdx = base64.IndexOf(',');
+                        if (commaIdx >= 0) base64 = base64.Substring(commaIdx + 1);
+                        qrBytesMap[item.Id] = Convert.FromBase64String(base64);
+                    }
+                    catch { }
                 }
             }
 
@@ -80,20 +93,33 @@ namespace GuptaBrothers.Web.Services
                                         {
                                             c.Item().Text("Customer Address").Bold().FontSize(12);
                                             c.Item().Text(label.CustomerName).Bold().FontSize(14.5f);
-                                            c.Item().Text(label.CustomerAddressLine1).FontSize(10.5f);
+                                            if (!string.IsNullOrWhiteSpace(label.CustomerAddressLine1))
+                                            {
+                                                c.Item().Text(label.CustomerAddressLine1).FontSize(10.5f);
+                                            }
                                             if (!string.IsNullOrWhiteSpace(label.CustomerAddressLine2))
                                             {
                                                 c.Item().Text(label.CustomerAddressLine2).FontSize(10.5f);
                                             }
-                                            c.Item().Text($"{label.CustomerCity}, {label.CustomerState}, {label.CustomerPincode}").FontSize(10.5f);
+                                            var cParts = new List<string>();
+                                            if (!string.IsNullOrWhiteSpace(label.CustomerCity)) cParts.Add(label.CustomerCity.Trim());
+                                            if (!string.IsNullOrWhiteSpace(label.CustomerState) && !string.Equals(label.CustomerState.Trim(), label.CustomerCity?.Trim(), StringComparison.OrdinalIgnoreCase)) cParts.Add(label.CustomerState.Trim());
+                                            if (!string.IsNullOrWhiteSpace(label.CustomerPincode)) cParts.Add(label.CustomerPincode.Trim());
+                                            if (cParts.Count > 0)
+                                            {
+                                                c.Item().Text(string.Join(", ", cParts)).FontSize(10.5f);
+                                            }
                                         });
 
                                         // Return Address
                                         left.Item().Padding(6).Column(r =>
                                         {
                                             r.Item().Text("If undelivered, return to:").Bold().FontSize(11);
-                                            r.Item().Text((label.ReturnCompanyName ?? "").ToUpperInvariant()).Bold().FontSize(12.5f);
-                                            r.Item().Text(label.ReturnAddressLine1).FontSize(10f);
+                                            r.Item().Text((label.ReturnCompanyName ?? label.SoldBy ?? "").ToUpperInvariant()).Bold().FontSize(12.5f);
+                                            if (!string.IsNullOrWhiteSpace(label.ReturnAddressLine1))
+                                            {
+                                                r.Item().Text(label.ReturnAddressLine1).FontSize(10f);
+                                            }
                                             if (!string.IsNullOrWhiteSpace(label.ReturnAddressLine2))
                                             {
                                                 r.Item().Text(label.ReturnAddressLine2).FontSize(10f);
@@ -102,7 +128,10 @@ namespace GuptaBrothers.Web.Services
                                             {
                                                 r.Item().Text(label.ReturnArea).FontSize(10f);
                                             }
-                                            r.Item().Text(label.ReturnCityStatePin).FontSize(10f);
+                                            if (!string.IsNullOrWhiteSpace(label.ReturnCityStatePin))
+                                            {
+                                                r.Item().Text(label.ReturnCityStatePin).FontSize(10f);
+                                            }
                                         });
                                     });
 
@@ -142,14 +171,10 @@ namespace GuptaBrothers.Web.Services
                                                 });
 
                                                 // High-res QR code image (Strictly encodes only AWB Tracking Number)
-                                                if (!string.IsNullOrEmpty(label.QrCodeBase64))
+                                                if (qrBytesMap.TryGetValue(label.Id, out var qrBytes))
                                                 {
                                                     try
                                                     {
-                                                        var base64 = label.QrCodeBase64;
-                                                        var commaIdx = base64.IndexOf(',');
-                                                        if (commaIdx >= 0) base64 = base64.Substring(commaIdx + 1);
-                                                        var qrBytes = Convert.FromBase64String(base64);
                                                         mRow.ConstantItem(112).Height(112).Image(qrBytes);
                                                     }
                                                     catch { }

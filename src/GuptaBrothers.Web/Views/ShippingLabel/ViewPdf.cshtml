@@ -51,26 +51,47 @@
                                 <div class="half-label-cust-box">
                                     <div class="half-label-sec-heading">Customer Address</div>
                                     <div class="half-label-cust-name">@Model.CustomerName</div>
-                                    <div class="half-label-text">@Model.CustomerAddressLine1</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.CustomerAddressLine1))
+                                    {
+                                        <div class="half-label-text">@Model.CustomerAddressLine1</div>
+                                    }
                                     @if (!string.IsNullOrWhiteSpace(Model.CustomerAddressLine2))
                                     {
                                         <div class="half-label-text">@Model.CustomerAddressLine2</div>
                                     }
-                                    <div class="half-label-text">
-                                        @Model.CustomerCity, @Model.CustomerState, @Model.CustomerPincode
-                                    </div>
+                                    @{
+                                        var custCityStatePin = new List<string>();
+                                        if (!string.IsNullOrWhiteSpace(Model.CustomerCity)) custCityStatePin.Add(Model.CustomerCity.Trim());
+                                        if (!string.IsNullOrWhiteSpace(Model.CustomerState) && !string.Equals(Model.CustomerState.Trim(), Model.CustomerCity?.Trim(), StringComparison.OrdinalIgnoreCase)) custCityStatePin.Add(Model.CustomerState.Trim());
+                                        if (!string.IsNullOrWhiteSpace(Model.CustomerPincode)) custCityStatePin.Add(Model.CustomerPincode.Trim());
+                                    }
+                                    @if (custCityStatePin.Count > 0)
+                                    {
+                                        <div class="half-label-text">
+                                            @string.Join(", ", custCityStatePin)
+                                        </div>
+                                    }
                                 </div>
 
                                 <div class="half-label-return-box">
                                     <div class="half-label-sec-heading">If undelivered, return to:</div>
-                                    <div class="half-label-comp-name">@Model.ReturnCompanyName</div>
-                                    <div class="half-label-text">@Model.ReturnAddressLine1</div>
+                                    <div class="half-label-comp-name">@(string.IsNullOrWhiteSpace(Model.ReturnCompanyName) ? Model.SoldBy : Model.ReturnCompanyName)</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.ReturnAddressLine1))
+                                    {
+                                        <div class="half-label-text">@Model.ReturnAddressLine1</div>
+                                    }
                                     @if (!string.IsNullOrWhiteSpace(Model.ReturnAddressLine2))
                                     {
                                         <div class="half-label-text">@Model.ReturnAddressLine2</div>
                                     }
-                                    <div class="half-label-text">@Model.ReturnArea</div>
-                                    <div class="half-label-text">@Model.ReturnCityStatePin</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.ReturnArea))
+                                    {
+                                        <div class="half-label-text">@Model.ReturnArea</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(Model.ReturnCityStatePin))
+                                    {
+                                        <div class="half-label-text">@Model.ReturnCityStatePin</div>
+                                    }
                                 </div>
                             </div>
 

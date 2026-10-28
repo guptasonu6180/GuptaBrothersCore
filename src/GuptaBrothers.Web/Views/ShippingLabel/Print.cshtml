@@ -52,26 +52,47 @@
                             <div class="half-label-cust-box">
                                 <div class="half-label-sec-heading">Customer Address</div>
                                 <div class="half-label-cust-name">@label.CustomerName</div>
-                                <div class="half-label-text">@label.CustomerAddressLine1</div>
+                                @if (!string.IsNullOrWhiteSpace(label.CustomerAddressLine1))
+                                {
+                                    <div class="half-label-text">@label.CustomerAddressLine1</div>
+                                }
                                 @if (!string.IsNullOrWhiteSpace(label.CustomerAddressLine2))
                                 {
                                     <div class="half-label-text">@label.CustomerAddressLine2</div>
                                 }
-                                <div class="half-label-text">
-                                    @label.CustomerCity, @label.CustomerState, @label.CustomerPincode
-                                </div>
+                                @{
+                                    var custCityStatePin = new List<string>();
+                                    if (!string.IsNullOrWhiteSpace(label.CustomerCity)) custCityStatePin.Add(label.CustomerCity.Trim());
+                                    if (!string.IsNullOrWhiteSpace(label.CustomerState) && !string.Equals(label.CustomerState.Trim(), label.CustomerCity?.Trim(), StringComparison.OrdinalIgnoreCase)) custCityStatePin.Add(label.CustomerState.Trim());
+                                    if (!string.IsNullOrWhiteSpace(label.CustomerPincode)) custCityStatePin.Add(label.CustomerPincode.Trim());
+                                }
+                                @if (custCityStatePin.Count > 0)
+                                {
+                                    <div class="half-label-text">
+                                        @string.Join(", ", custCityStatePin)
+                                    </div>
+                                }
                             </div>
 
                             <div class="half-label-return-box">
                                 <div class="half-label-sec-heading">If undelivered, return to:</div>
-                                <div class="half-label-comp-name">@label.ReturnCompanyName</div>
-                                <div class="half-label-text">@label.ReturnAddressLine1</div>
+                                <div class="half-label-comp-name">@(string.IsNullOrWhiteSpace(label.ReturnCompanyName) ? label.SoldBy : label.ReturnCompanyName)</div>
+                                @if (!string.IsNullOrWhiteSpace(label.ReturnAddressLine1))
+                                {
+                                    <div class="half-label-text">@label.ReturnAddressLine1</div>
+                                }
                                 @if (!string.IsNullOrWhiteSpace(label.ReturnAddressLine2))
                                 {
                                     <div class="half-label-text">@label.ReturnAddressLine2</div>
                                 }
-                                <div class="half-label-text">@label.ReturnArea</div>
-                                <div class="half-label-text">@label.ReturnCityStatePin</div>
+                                @if (!string.IsNullOrWhiteSpace(label.ReturnArea))
+                                {
+                                    <div class="half-label-text">@label.ReturnArea</div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(label.ReturnCityStatePin))
+                                {
+                                    <div class="half-label-text">@label.ReturnCityStatePin</div>
+                                }
                             </div>
                         </div>
 

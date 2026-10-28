@@ -117,9 +117,17 @@ namespace GuptaBrothers.Web.Models
         // Additional / Computed
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Dynamic QR and Barcode representations
+        // Dynamic QR and Barcode representations (Dynamic cached properties, ignored during JSON file persistence for speed and compact size)
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? QrCodeSvg { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? QrCodeBase64 { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string? BarcodeSvg { get; set; }
 
         public void AutoCalculate()
