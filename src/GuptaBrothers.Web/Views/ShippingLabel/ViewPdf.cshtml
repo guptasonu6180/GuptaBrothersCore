@@ -1,0 +1,150 @@
+@model GuptaBrothers.Web.Models.ShippingLabelModel
+@{
+    ViewBag.Title = $"Shipping Label Preview - {Model.AWBNumber} - Gupta Brothers";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2" data-bs-toggle="tooltip" title="Return to Orders Dashboard">
+                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Shipping Label (Half Format)
+                <span class="badge bg-primary ms-2 font-monospace">@Model.AWBNumber</span>
+            </h5>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Download high-resolution vector PDF label">
+                <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Download PDF
+            </a>
+            <a asp-action="Print" asp-route-ids="@Model.Id" target="_blank" class="btn btn-cyber-dark btn-sm" data-bs-toggle="tooltip" title="Print this thermal shipping label">
+                <i class="bi bi-printer me-1"></i> Print Thermal Label
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-cyber-primary btn-sm" data-bs-toggle="tooltip" title="Edit order information">
+                <i class="bi bi-pencil me-1"></i> Edit Order
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Center Printable Label Card -->
+        <div class="col-lg-8 col-xl-7 mx-auto">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom text-muted small">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="~/images/gupta-brothers-emblem.svg" alt="GB" width="20" height="20" />
+                        <span>Standard 4" x 6" / A6 E-Commerce Shipping Label (Half Format)</span>
+                    </div>
+                    <div>
+                        Courier: <strong>@Model.CourierName</strong> | AWB: <strong class="font-monospace">@Model.AWBNumber</strong>
+                    </div>
+                </div>
+
+                <!-- Half Label Frame Strictly Matching Image 2 -->
+                <div class="half-label-container">
+                    <div class="half-label-card">
+                        <!-- TOP SECTION -->
+                        <div class="half-label-top">
+                            <!-- Top Left: Customer Address + Return Address -->
+                            <div class="half-label-left">
+                                <div class="half-label-cust-box">
+                                    <div class="half-label-sec-heading">Customer Address</div>
+                                    <div class="half-label-cust-name">@Model.CustomerName</div>
+                                    <div class="half-label-text">@Model.CustomerAddressLine1</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.CustomerAddressLine2))
+                                    {
+                                        <div class="half-label-text">@Model.CustomerAddressLine2</div>
+                                    }
+                                    <div class="half-label-text">
+                                        @Model.CustomerCity, @Model.CustomerState, @Model.CustomerPincode
+                                    </div>
+                                </div>
+
+                                <div class="half-label-return-box">
+                                    <div class="half-label-sec-heading">If undelivered, return to:</div>
+                                    <div class="half-label-comp-name">@Model.ReturnCompanyName</div>
+                                    <div class="half-label-text">@Model.ReturnAddressLine1</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.ReturnAddressLine2))
+                                    {
+                                        <div class="half-label-text">@Model.ReturnAddressLine2</div>
+                                    }
+                                    <div class="half-label-text">@Model.ReturnArea</div>
+                                    <div class="half-label-text">@Model.ReturnCityStatePin</div>
+                                </div>
+                            </div>
+
+                            <!-- Top Right: Payment Status + Pickup/Routing + QR Code + Barcode -->
+                            <div class="half-label-right">
+                                <div class="half-label-payment-banner">
+                                    @Model.PaymentStatus
+                                </div>
+
+                                <div class="half-label-content-right">
+                                    <div class="half-label-routing-row">
+                                        <div class="half-label-routing-details">
+                                            <div class="half-label-courier-line">
+                                                <span class="half-label-courier-name">@Model.CourierName</span>
+                                                <span class="half-label-badge-pickup">@Model.PickupBadgeText</span>
+                                                <span class="half-label-badge-date">@Model.PickupDateBadge</span>
+                                            </div>
+                                            <div class="half-label-hub-code">@Model.HubCode</div>
+                                            <div class="half-label-route-lines">
+                                                @if (!string.IsNullOrWhiteSpace(Model.RoutingLine1)) { <div>@Model.RoutingLine1</div> }
+                                                @if (!string.IsNullOrWhiteSpace(Model.RoutingLine2)) { <div>@Model.RoutingLine2</div> }
+                                                @if (!string.IsNullOrWhiteSpace(Model.RoutingLine3)) { <div>@Model.RoutingLine3</div> }
+                                            </div>
+                                        </div>
+                                        <div class="half-label-qr-box">
+                                            @if (!string.IsNullOrEmpty(Model.QrCodeBase64))
+                                            {
+                                                <img src="@Model.QrCodeBase64" alt="QR Code" />
+                                            }
+                                            else
+                                            {
+                                                @Html.Raw(Model.QrCodeSvg)
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Vector Code 128 Barcode + AWB -->
+                                    <div class="half-label-barcode-row">
+                                        <div class="half-label-awb-text">@Model.AWBNumber</div>
+                                        <div class="half-label-barcode-svg">
+                                            @Html.Raw(Model.BarcodeSvg)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PRODUCT DETAILS SECTION -->
+                        <div class="half-label-product-header">
+                            Product Details
+                        </div>
+                        <table class="half-label-product-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 44%;">SKU</th>
+                                    <th style="width: 15%;">Size</th>
+                                    <th style="width: 9%;">Qty</th>
+                                    <th style="width: 13%;">Color</th>
+                                    <th style="width: 19%;">Order No.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.SKU</td>
+                                    <td>@Model.Size</td>
+                                    <td>@Model.Qty</td>
+                                    <td>@Model.Color</td>
+                                    <td>@Model.OrderNo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

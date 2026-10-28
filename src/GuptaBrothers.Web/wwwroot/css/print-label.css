@@ -1,0 +1,152 @@
+/**
+ * Gupta Brothers - Thermal Print Stylesheet (Half Shipping Label Format)
+ * Designed for 100mm x 150mm / 4" x 6" / 4" x 4" Thermal Roll Printers
+ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.print-preview-mode {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    background: #e2e8f0;
+    line-height: 1.25;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* ==========================================================================
+   SCREEN PRINT TOOLBAR
+   ========================================================================== */
+.no-print-toolbar {
+    background: #1e293b;
+    color: #ffffff;
+    padding: 10px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.no-print-toolbar .toolbar-brand-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.no-print-toolbar .toolbar-logo-icon {
+    height: 30px;
+    width: auto;
+}
+
+.no-print-toolbar .toolbar-badge {
+    margin-left: 10px;
+    opacity: 0.8;
+    font-size: 12px;
+}
+
+.no-print-toolbar .toolbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.no-print-toolbar .btn {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+
+.no-print-toolbar .btn:hover {
+    background: #1d4ed8;
+}
+
+.no-print-toolbar .btn-secondary {
+    background: #475569;
+}
+
+.no-print-toolbar .btn-secondary:hover {
+    background: #334155;
+}
+
+/* ==========================================================================
+   PAGE CONTAINERS
+   ========================================================================== */
+.labels-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    gap: 24px;
+}
+
+.label-page {
+    width: 734px;
+    background: #ffffff;
+    padding: 0;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   PRINT MEDIA RULES
+   ========================================================================== */
+@media print {
+    body, body.print-preview-mode {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .no-print-toolbar {
+        display: none !important;
+    }
+
+    .labels-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        gap: 0 !important;
+        display: block !important;
+    }
+
+    .label-page {
+        width: 734px !important;
+        max-width: 734px !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        page-break-after: always !important;
+        break-after: page !important;
+    }
+
+    .label-page:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
+    }
+
+    @page {
+        margin: 4mm 4mm;
+        size: auto;
+    }
+}

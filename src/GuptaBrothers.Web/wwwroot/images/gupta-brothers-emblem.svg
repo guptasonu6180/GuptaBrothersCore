@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="gbGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="gbGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="darkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <filter id="neonDrop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#06b6d4" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background Hex Shield -->
+  <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#darkBg)" stroke="url(#gbGlow)" stroke-width="2.5" filter="url(#neonDrop)"/>
+
+  <!-- Futuristic Geometric Circuit Accents -->
+  <circle cx="24" cy="24" r="2.5" fill="#06b6d4" opacity="0.7"/>
+  <circle cx="96" cy="24" r="2.5" fill="#38bdf8" opacity="0.7"/>
+  <circle cx="24" cy="96" r="2.5" fill="#7c3aed" opacity="0.7"/>
+  <circle cx="96" cy="96" r="2.5" fill="#2563eb" opacity="0.7"/>
+  <line x1="24" y1="24" x2="36" y2="24" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+  <line x1="96" y1="96" x2="84" y2="96" stroke="#2563eb" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Monogram GB Vector Construction -->
+  <!-- Letter G -->
+  <path d="M 52 35
+           C 38 35, 27 45, 27 60
+           C 27 75, 38 85, 52 85
+           C 62 85, 66 79, 66 73
+           L 66 63
+           L 47 63
+           L 47 54
+           L 75 54
+           L 75 74
+           C 75 85, 66 93, 51 93
+           C 33 93, 18 79, 18 60
+           C 18 41, 33 27, 52 27
+           C 62 27, 70 31, 75 37
+           L 67 43
+           C 63 38, 58 35, 52 35 Z"
+        fill="url(#gbGlow)"/>
+
+  <!-- Letter B (Interlinked futuristic design) -->
+  <path d="M 64 29
+           L 86 29
+           C 96 29, 103 35, 103 44
+           C 103 50, 99 55, 93 57
+           C 100 60, 105 66, 105 75
+           C 105 85, 97 91, 85 91
+           L 64 91
+           Z
+           M 74 38
+           L 74 53
+           L 84 53
+           C 90 53, 94 50, 94 45.5
+           C 94 41, 90 38, 84 38
+           Z
+           M 74 62
+           L 74 82
+           L 85 82
+           C 91 82, 96 78, 96 72
+           C 96 66, 91 62, 85 62
+           Z"
+        fill="url(#gbGold)" opacity="0.95"/>
+
+  <!-- Central Dynamic Logistics Pulse Beam / Spark -->
+  <polygon points="63,22 66,16 69,22 75,25 69,28 66,34 63,28 57,25" fill="#38bdf8"/>
+</svg>

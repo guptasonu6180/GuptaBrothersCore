@@ -1,0 +1,297 @@
+/**
+ * Gupta Brothers - Standard E-Commerce Half Shipping Label Stylesheet
+ * Exact layout, spacing, and typography matching Valmo Half Shipping Label sample PDF:
+ * Fixed Width: 734px
+ * Proportional Height: 445px
+ */
+
+.half-label-container {
+    width: 734px;
+    margin: 0 auto;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.half-label-card {
+    width: 734px;
+    min-height: 445px;
+    border: 2px solid #000000;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   TOP SECTION: Customer Address + Return Address (Left) / Logistics (Right)
+   ========================================================================== */
+.half-label-top {
+    display: flex;
+    width: 100%;
+    border-bottom: 2px solid #000000;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+/* Left Column: 326px wide with 2px solid #000 right border */
+.half-label-left {
+    width: 326px;
+    min-width: 326px;
+    max-width: 326px;
+    border-right: 2px solid #000000;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Customer Address: Clean padding, no cut-off overflow */
+.half-label-cust-box {
+    width: 100%;
+    padding: 8px 10px;
+    border-bottom: 2px solid #000000;
+    box-sizing: border-box;
+}
+
+.half-label-sec-heading {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 3px;
+    color: #000000;
+    line-height: 1.2;
+}
+
+.half-label-cust-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 3px;
+    color: #000000;
+    line-height: 1.2;
+}
+
+.half-label-text {
+    font-size: 11.5px;
+    color: #000000;
+    line-height: 1.35;
+    word-break: break-word;
+    font-weight: 400;
+    margin-bottom: 1px;
+}
+
+/* Return Address */
+.half-label-return-box {
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    flex-grow: 1;
+}
+
+.half-label-comp-name {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 3px;
+    color: #000000;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+/* Right Column: 404px wide */
+.half-label-right {
+    width: 404px;
+    min-width: 404px;
+    max-width: 404px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Payment Banner */
+.half-label-payment-banner {
+    height: 25px;
+    min-height: 25px;
+    background: #000000;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13.5px;
+    line-height: 25px;
+    padding: 0 10px;
+    text-align: left;
+    border-bottom: 2px solid #000000;
+    box-sizing: border-box;
+    letter-spacing: 0.2px;
+}
+
+/* Content wrapper in right column */
+.half-label-content-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding: 8px 10px 6px 10px;
+    box-sizing: border-box;
+}
+
+/* Middle Routing & QR Row */
+.half-label-routing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+}
+
+.half-label-routing-details {
+    flex: 1;
+    padding-right: 6px;
+    box-sizing: border-box;
+}
+
+.half-label-courier-line {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+
+.half-label-courier-name {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1;
+    color: #000000;
+}
+
+.half-label-badge-pickup {
+    background: #000000;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11.5px;
+    padding: 1.5px 4px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.half-label-badge-date {
+    border: 1.5px solid #000000;
+    font-weight: 700;
+    font-size: 17px;
+    padding: 1px 6px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.half-label-hub-code {
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    margin: 6px 0 0 0;
+    line-height: 1;
+    color: #000000;
+}
+
+/* Routing lines positioned at the bottom-left of QR code */
+.half-label-route-lines {
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.35;
+    letter-spacing: 0.5px;
+    color: #000000;
+    margin-top: 50px; /* Aligns routing lines with lower part of QR code as in PDF */
+}
+
+.half-label-route-lines div {
+    margin-bottom: 1px;
+}
+
+.half-label-qr-box {
+    width: 145px;
+    height: 145px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 2px;
+}
+
+.half-label-qr-box img,
+.half-label-qr-box svg {
+    width: 145px;
+    height: 145px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Barcode Area: Centered right below routing lines & QR code */
+.half-label-barcode-row {
+    padding: 6px 0 2px 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.half-label-awb-text {
+    font-weight: 700;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+    color: #000000;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.half-label-barcode-svg {
+    width: 365px;
+    height: 60px;
+    margin: 0 auto;
+    display: block;
+}
+
+.half-label-barcode-svg svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* ==========================================================================
+   PRODUCT DETAILS SECTION
+   ========================================================================== */
+.half-label-product-header {
+    font-weight: 700;
+    font-size: 13px;
+    padding: 5px 10px 2px 10px;
+    background: #ffffff;
+    color: #000000;
+    line-height: 1.2;
+}
+
+.half-label-product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+.half-label-product-table th {
+    text-align: left;
+    font-weight: 700;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: #000000;
+    border: none;
+    line-height: 1.2;
+}
+
+.half-label-product-table td {
+    padding: 2px 10px 8px 10px;
+    vertical-align: top;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: #000000;
+    border: none;
+    line-height: 1.25;
+}

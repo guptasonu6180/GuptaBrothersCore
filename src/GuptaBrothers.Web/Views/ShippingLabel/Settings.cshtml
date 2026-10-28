@@ -1,0 +1,123 @@
+@model GuptaBrothers.Web.Models.LabelSettingsModel
+@{
+    ViewBag.Title = "Settings & QR Configuration - Gupta Brothers";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-sliders me-2 text-primary"></i>Default Label & QR Code Settings
+            </h4>
+        </div>
+    </div>
+
+    <form asp-action="Settings" method="post" class="form-panel-card">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- 1. Seller & Invoice Defaults -->
+            <div class="col-12">
+                <h6 class="form-section-header">
+                    <i class="bi bi-shop"></i>1. Default Seller & Tax Details (Used during Excel Import)
+                </h6>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Sold By (Seller Business Name)</label>
+                <input asp-for="DefaultSoldBy" class="form-control form-control-gb" />
+                <small class="text-muted">e.g. RAMESHBHAI RANGANI</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Seller GSTIN</label>
+                <input asp-for="DefaultSellerGSTIN" class="form-control form-control-gb font-monospace" />
+                <small class="text-muted">e.g. 24BFLPR4388M1ZM</small>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-semibold">Seller Registered Address</label>
+                <input asp-for="DefaultSellerAddress" class="form-control form-control-gb" />
+                <small class="text-muted">e.g. AALOKHAJEWELS, D-502 FIFTH FLOOR Angan Residency Puna Simada Road , Surat, Gujarat, 395010</small>
+            </div>
+
+            <!-- 2. Return Address Defaults -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-arrow-return-left"></i>2. Default Return Address ("If undelivered, return to:")
+                </h6>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Return Company Name / Brand</label>
+                <input asp-for="DefaultReturnCompanyName" class="form-control form-control-gb" />
+                <small class="text-muted">e.g. AALOKHAJEWELS</small>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Return Address Line 1</label>
+                <input asp-for="DefaultReturnAddressLine1" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Return Address Line 2</label>
+                <input asp-for="DefaultReturnAddressLine2" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Return Area / Locality</label>
+                <input asp-for="DefaultReturnArea" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Return City, State & Pincode</label>
+                <input asp-for="DefaultReturnCityStatePin" class="form-control form-control-gb" />
+            </div>
+
+            <!-- 3. QR Code & Courier Configuration -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-qr-code-scan"></i>3. QR Code & Courier Settings
+                </h6>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Default Courier Partner</label>
+                <input asp-for="DefaultCourierName" class="form-control form-control-gb" />
+                <small class="text-muted">e.g. Valmo</small>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Default Hub Code</label>
+                <input asp-for="DefaultHubCode" class="form-control form-control-gb" />
+                <small class="text-muted">e.g. UFC-R0</small>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">QR Code Content Format</label>
+                <select asp-for="QrCodeContentPattern" class="form-select form-control-gb">
+                    <option value="{AWB}">AWB Tracking Number (Default: {AWB})</option>
+                    <option value="{AWB}|{OrderNo}">AWB + Order No ({AWB}|{OrderNo})</option>
+                    <option value="{OrderNo}">Order Number ({OrderNo})</option>
+                </select>
+                <small class="text-muted">Determines what data is encoded in the top-right QR code.</small>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Default GST Rate (%)</label>
+                <input asp-for="DefaultGstRate" type="number" step="0.1" class="form-control form-control-gb" />
+                <small class="text-muted">Used to calculate taxable amount from gross price (Default 3.0%)</small>
+            </div>
+
+            <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary px-4">Back</a>
+                <button type="submit" class="btn btn-cyber-primary px-4">
+                    <i class="bi bi-check-lg me-1"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

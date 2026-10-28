@@ -1,0 +1,247 @@
+@model GuptaBrothers.Web.Models.ShippingLabelModel
+@{
+    ViewBag.Title = $"Edit Label - {Model.AWBNumber} - Gupta Brothers";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-pencil me-2 text-primary"></i>Edit Shipping Label & Tax Invoice
+                <span class="badge bg-secondary ms-2 font-monospace">@Model.AWBNumber</span>
+            </h4>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="ViewPdf" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-action-rounded">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Preview Label
+            </a>
+            <a asp-action="Print" asp-route-ids="@Model.Id" target="_blank" class="btn btn-cyber-dark">
+                <i class="bi bi-printer me-1"></i> Print
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post" class="form-panel-card">
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.CreatedAt)
+
+        <div class="row g-4">
+            <!-- 1. Courier & Tracking Details -->
+            <div class="col-12">
+                <h6 class="form-section-header">
+                    <i class="bi bi-truck"></i>1. Courier & Routing Information
+                </h6>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">AWB / Tracking Number *</label>
+                <input asp-for="AWBNumber" class="form-control form-control-gb font-monospace" required />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Courier Name</label>
+                <input asp-for="CourierName" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Pickup Date / Batch</label>
+                <input asp-for="PickupDateBadge" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Payment / Collect Status</label>
+                <input asp-for="PaymentStatus" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Hub Code</label>
+                <input asp-for="HubCode" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Routing Line 1</label>
+                <input asp-for="RoutingLine1" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Routing Line 2</label>
+                <input asp-for="RoutingLine2" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Routing Line 3</label>
+                <input asp-for="RoutingLine3" class="form-control form-control-gb" />
+            </div>
+
+            <!-- 2. Customer Delivery Address -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-geo-alt"></i>2. Customer / Destination Address
+                </h6>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Customer Full Name *</label>
+                <input asp-for="CustomerName" class="form-control form-control-gb" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Address Line 1 *</label>
+                <input asp-for="CustomerAddressLine1" class="form-control form-control-gb" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Address Line 2 / Landmark</label>
+                <input asp-for="CustomerAddressLine2" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">City / Town *</label>
+                <input asp-for="CustomerCity" class="form-control form-control-gb" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">State *</label>
+                <input asp-for="CustomerState" class="form-control form-control-gb" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Pincode *</label>
+                <input asp-for="CustomerPincode" class="form-control form-control-gb font-monospace" required />
+            </div>
+
+            <!-- 3. Product & Order Details -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-box"></i>3. Product & Order Details
+                </h6>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Order Number *</label>
+                <input asp-for="OrderNo" class="form-control form-control-gb font-monospace" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">SKU Code *</label>
+                <input asp-for="SKU" class="form-control form-control-gb font-monospace" required />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Size</label>
+                <input asp-for="Size" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Color</label>
+                <input asp-for="Color" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-8">
+                <label class="form-label fw-semibold">Item Description</label>
+                <input asp-for="ItemDescription" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">HSN Code</label>
+                <input asp-for="HSNCode" class="form-control form-control-gb font-monospace" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Quantity</label>
+                <input asp-for="Qty" type="number" min="1" class="form-control form-control-gb" />
+            </div>
+
+            <!-- 4. Pricing & Tax Details -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-receipt"></i>4. Tax Invoice & Financials
+                </h6>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Gross Amount (Rs.) *</label>
+                <input asp-for="GrossAmount" type="number" step="0.01" class="form-control form-control-gb" required />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Discount (Rs.)</label>
+                <input asp-for="Discount" type="number" step="0.01" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Taxable Value (Rs.)</label>
+                <input asp-for="TaxableValue" type="number" step="0.01" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">GST Rate</label>
+                <input asp-for="TaxRateDescription" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Other Charges (Logistics)</label>
+                <input asp-for="OtherCharges" type="number" step="0.01" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Invoice Number</label>
+                <input asp-for="InvoiceNo" class="form-control form-control-gb font-monospace" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Order Date</label>
+                <input asp-for="OrderDate" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Invoice Date</label>
+                <input asp-for="InvoiceDate" class="form-control form-control-gb" />
+            </div>
+
+            <!-- 5. Return & Seller Details -->
+            <div class="col-12 mt-4">
+                <h6 class="form-section-header">
+                    <i class="bi bi-shop"></i>5. Seller & Return Address
+                </h6>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Sold By</label>
+                <input asp-for="SoldBy" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Seller GSTIN</label>
+                <input asp-for="SellerGSTIN" class="form-control form-control-gb font-monospace" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Return Company Name</label>
+                <input asp-for="ReturnCompanyName" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Seller Registered Address</label>
+                <input asp-for="SellerAddress" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Return Address Lines</label>
+                <input asp-for="ReturnAddressLine1" class="form-control form-control-gb mb-1" />
+                <input asp-for="ReturnCityStatePin" class="form-control form-control-gb" />
+            </div>
+
+            <div class="col-12 mt-4 d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary px-4">Cancel</a>
+                <button type="submit" class="btn btn-cyber-primary px-4">
+                    <i class="bi bi-check-lg me-1"></i> Update Label
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

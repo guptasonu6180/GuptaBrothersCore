@@ -1,0 +1,858 @@
+/**
+ * Gupta Brothers Enterprise - Futuristic Cyber Theme & System Styles
+ * Version: 2.8 - High-End SaaS UI Architecture
+ */
+
+:root {
+    --gb-dark-bg: #090d16;
+    --gb-surface: #0f172a;
+    --gb-surface-elevated: #1e293b;
+    --gb-card-bg: #ffffff;
+    --gb-cyan: #06b6d4;
+    --gb-cyan-glow: rgba(6, 182, 212, 0.4);
+    --gb-blue: #2563eb;
+    --gb-blue-glow: rgba(37, 99, 235, 0.35);
+    --gb-emerald: #10b981;
+    --gb-emerald-glow: rgba(16, 185, 129, 0.3);
+    --gb-purple: #8b5cf6;
+    --gb-purple-glow: rgba(139, 92, 246, 0.3);
+    --gb-amber: #f59e0b;
+    --gb-rose: #f43f5e;
+    --gb-text-main: #0f172a;
+    --gb-text-muted: #64748b;
+    --gb-border: #e2e8f0;
+    --gb-border-dark: #334155;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: #f8fafc !important;
+    color: var(--gb-text-main) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   FUTURISTIC HEADER & NAVBAR
+   ========================================================================== */
+header.app-top-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1050 !important;
+    min-height: 62px !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    background: linear-gradient(135deg, #090d16 0%, #0f172a 100%) !important;
+    border-bottom: 1px solid rgba(6, 182, 212, 0.25) !important;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(6, 182, 212, 0.08) !important;
+    padding: 8px 30px !important;
+}
+
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #ffffff !important;
+    transition: opacity 0.2s ease;
+}
+
+.brand-container:hover {
+    opacity: 0.95;
+}
+
+.brand-logo-img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.3));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.brand-logo-img:hover {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.6));
+}
+
+.brand-title-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #ffffff;
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-subtitle-text {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.cyber-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    background: rgba(6, 182, 212, 0.15);
+    color: #38bdf8;
+    padding: 2px 7px;
+    border-radius: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-link-cyber {
+    color: #94a3b8 !important;
+    text-decoration: none !important;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+
+.nav-link-cyber:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.nav-link-cyber.active {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(37, 99, 235, 0.3) 100%) !important;
+    border: 1px solid rgba(6, 182, 212, 0.5) !important;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   MAIN CONTAINER & PAGE HEADER
+   ========================================================================== */
+.main-container {
+    padding: 22px 30px 50px 30px !important;
+    min-height: calc(100vh - 62px);
+    background-color: #f8fafc;
+    position: relative;
+    display: block;
+    clear: both;
+}
+
+/* ==========================================================================
+   FUTURISTIC KPI SUMMARY CARDS
+   ========================================================================== */
+.kpi-card-futuristic {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 16px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kpi-card-futuristic:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -5px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.kpi-card-futuristic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.kpi-card-futuristic.card-cyan::before { background: linear-gradient(180deg, #06b6d4, #3b82f6); }
+.kpi-card-futuristic.card-emerald::before { background: linear-gradient(180deg, #10b981, #059669); }
+.kpi-card-futuristic.card-purple::before { background: linear-gradient(180deg, #8b5cf6, #6d28d9); }
+.kpi-card-futuristic.card-amber::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+
+.kpi-label-cyan { font-size: 0.68rem; letter-spacing: 0.8px; color: #0284c7; text-transform: uppercase; font-weight: 700; }
+.kpi-label-emerald { font-size: 0.68rem; letter-spacing: 0.8px; color: #059669; text-transform: uppercase; font-weight: 700; }
+.kpi-label-purple { font-size: 0.68rem; letter-spacing: 0.8px; color: #7c3aed; text-transform: uppercase; font-weight: 700; }
+.kpi-label-amber { font-size: 0.68rem; letter-spacing: 0.8px; color: #d97706; text-transform: uppercase; font-weight: 700; }
+
+.kpi-value-text {
+    font-size: 1.85rem;
+    letter-spacing: -0.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+}
+
+.kpi-value-currency {
+    font-size: 1.65rem;
+    letter-spacing: -0.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+}
+
+.kpi-badge-cyan { background: rgba(6, 182, 212, 0.15); color: #0284c7; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+.kpi-badge-emerald { background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+.kpi-badge-purple { background: rgba(139, 92, 246, 0.15); color: #7c3aed; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+.kpi-badge-amber { background: rgba(245, 158, 11, 0.15); color: #d97706; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+
+.kpi-icon-cyber {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    transition: transform 0.2s ease;
+}
+
+.kpi-icon-cyan { background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(37, 99, 235, 0.15)); color: #0284c7; }
+.kpi-icon-emerald { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15)); color: #059669; }
+.kpi-icon-purple { background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(109, 40, 217, 0.15)); color: #7c3aed; }
+.kpi-icon-amber { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15)); color: #d97706; }
+
+/* ==========================================================================
+   TOOLBAR CARD & SEARCH INPUT
+   ========================================================================== */
+.toolbar-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+}
+
+.toolbar-filter-logo {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: #0f172a;
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.15);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.toolbar-filter-logo:hover {
+    border-color: #06b6d4;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+    transform: translateY(-1px);
+}
+
+.toolbar-filter-logo img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: stretch;
+    height: 36px;
+}
+
+.search-icon-addon {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #0284c7;
+    padding: 0 0.75rem;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-right: none;
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.search-input-field {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: none;
+    border-right: none;
+    font-size: 0.82rem;
+    height: 36px;
+}
+
+.search-input-field:focus {
+    background-color: #ffffff;
+    box-shadow: none;
+    border-color: #06b6d4;
+}
+
+.search-clear-btn {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    color: #64748b;
+    height: 36px;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+}
+
+.search-clear-btn:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+/* ==========================================================================
+   COMPACT & COHESIVE ACTION PILL BUTTONS (Unified 34px Height, Hover Tooltips)
+   ========================================================================== */
+.btn-action-pill {
+    height: 34px !important;
+    padding: 0 11px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    border-radius: 7px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+    transition: all 0.18s ease !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    border: 1px solid transparent;
+    flex-shrink: 0;
+}
+
+.btn-action-pill:hover {
+    transform: translateY(-1px);
+}
+
+.btn-pill-primary {
+    background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%);
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+    border: none;
+}
+.btn-pill-primary:hover {
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.45);
+}
+
+.btn-pill-emerald {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: #10b981;
+    color: #059669 !important;
+}
+.btn-pill-emerald:hover {
+    background: #10b981;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+}
+
+.btn-pill-purple {
+    background: rgba(139, 92, 246, 0.08);
+    border-color: #8b5cf6;
+    color: #7c3aed !important;
+}
+.btn-pill-purple:hover {
+    background: #8b5cf6;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
+}
+
+.btn-pill-pdf {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: #ef4444;
+    color: #dc2626 !important;
+}
+.btn-pill-pdf:hover {
+    background: #dc2626;
+    color: #ffffff !important;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+}
+
+.btn-pill-dark {
+    background: #0f172a;
+    border-color: #334155;
+    color: #ffffff !important;
+}
+.btn-pill-dark:hover {
+    background: #1e293b;
+    border-color: #475569;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-pill-outline {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #334155 !important;
+}
+.btn-pill-outline:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a !important;
+}
+.btn-pill-outline:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+.btn-pill-icon-only {
+    width: 34px !important;
+    padding: 0 !important;
+    min-width: 34px !important;
+}
+
+/* ==========================================================================
+   TABLE ACTION BUTTONS (Sleek 30px Height, Guaranteed No Wrapping)
+   ========================================================================== */
+.actions-cell-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+}
+
+.btn-table-action {
+    height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.76rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    padding: 0 8px !important;
+    transition: all 0.18s ease !important;
+    text-decoration: none !important;
+    border: 1px solid transparent !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.btn-table-preview {
+    background: #f0f9ff !important;
+    border-color: #bae6fd !important;
+    color: #0284c7 !important;
+    min-width: 68px !important;
+    padding: 0 10px !important;
+    gap: 4px !important;
+}
+.btn-table-preview span {
+    white-space: nowrap !important;
+    display: inline !important;
+}
+.btn-table-preview:hover {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
+.btn-table-print {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+.btn-table-print:hover {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #0f172a !important;
+}
+
+.btn-table-pdf {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+.btn-table-pdf:hover {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+}
+
+.btn-table-edit {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #475569 !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+.btn-table-edit:hover {
+    background: #475569 !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+.btn-table-delete {
+    background: #fff1f2 !important;
+    border-color: #fecdd3 !important;
+    color: #e11d48 !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+.btn-table-delete:hover {
+    background: #e11d48 !important;
+    color: #ffffff !important;
+    border-color: #e11d48 !important;
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.35);
+}
+
+/* ==========================================================================
+   DATA TABLE: LARGE SPACIOUS COLUMNS WITH COMPLETE UNTRUNCATED DETAILS
+   ========================================================================== */
+.table-card-container {
+    background: #ffffff;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.85rem 1.15rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-header-icon-pill {
+    border-radius: 50%;
+    padding: 6px;
+    background: rgba(6, 182, 212, 0.1);
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-header-title {
+    margin-bottom: 0;
+    font-weight: 700;
+    color: #0f172a;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+}
+
+.table-scroll-container {
+    max-height: 720px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* Large, unconstrained column table layout */
+.table-large-details {
+    width: 100%;
+    min-width: 1710px;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-large-details th,
+.table-large-details td {
+    vertical-align: middle;
+    padding: 12px 14px !important;
+}
+
+.table-large-details th {
+    font-size: 0.72rem;
+    letter-spacing: 0.8px;
+    color: #64748b;
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+
+.table-large-details tbody tr {
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-large-details tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.order-no-text {
+    font-weight: 700;
+    font-family: monospace, sans-serif;
+    font-size: 0.88rem;
+    color: #0f172a;
+    word-break: break-all;
+    line-height: 1.25;
+}
+
+.customer-address-full {
+    font-size: 0.82rem;
+    color: #475569;
+    line-height: 1.35;
+    margin-top: 2px;
+    word-break: break-word;
+}
+
+.product-desc-full {
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.35;
+    margin-top: 2px;
+    word-break: break-word;
+}
+
+.product-sku-badge {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: #0284c7;
+    background: rgba(6, 182, 212, 0.08);
+    padding: 2px 7px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 3px;
+    border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.barcode-cell-container {
+    width: 145px;
+    height: 32px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.barcode-cell-container svg {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==========================================================================
+   QR CODE THUMBNAIL CARD & MODAL
+   ========================================================================== */
+.qr-thumb-card {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 2px;
+}
+
+.qr-thumb-card:hover {
+    transform: scale(1.1);
+    border-color: #06b6d4;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+}
+
+.qr-thumb-card img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+.qr-modal-frame {
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    padding: 1.25rem !important;
+}
+
+.qr-modal-image-box {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    display: inline-block;
+    margin: 0 auto 1rem auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.qr-modal-image-box img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    display: block;
+}
+
+.qr-modal-info-panel {
+    text-align: left;
+    background: #f8fafc;
+    padding: 0.85rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+/* ==========================================================================
+   CYBER TOOLTIPS STYLING
+   ========================================================================== */
+.tooltip .tooltip-inner {
+    background-color: #090d16 !important;
+    color: #38bdf8 !important;
+    font-size: 0.74rem !important;
+    font-weight: 500 !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+    max-width: 280px !important;
+}
+
+.tooltip .tooltip-arrow::before {
+    border-top-color: #090d16 !important;
+    border-bottom-color: #090d16 !important;
+}
+
+/* ==========================================================================
+   FORMS & INPUT CARDS (Create, Edit, Settings)
+   ========================================================================== */
+.form-panel-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    padding: 1.5rem;
+}
+
+.form-section-header {
+    font-weight: 700;
+    color: #2563eb;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.form-control-gb {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.84rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control-gb:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+}
+
+/* ==========================================================================
+   ALERTS & NOTIFICATIONS
+   ========================================================================== */
+.alert-gb-success {
+    border-radius: 10px !important;
+    background: #ecfdf5 !important;
+    border: none !important;
+    border-left: 4px solid #10b981 !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.alert-gb-danger {
+    border-radius: 10px !important;
+    background: #fff1f2 !important;
+    border: none !important;
+    border-left: 4px solid #f43f5e !important;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.1);
+}
+
+/* ==========================================================================
+   MODAL UPLOAD DROPZONE
+   ========================================================================== */
+.upload-dropzone-box {
+    text-align: center;
+    padding: 1.25rem;
+    margin-bottom: 0.85rem;
+    border-radius: 10px;
+    border: 2px dashed #94a3b8;
+    background: #f8fafc;
+    transition: border-color 0.2s ease;
+}
+
+.upload-dropzone-box:hover {
+    border-color: #06b6d4;
+}
+
+.template-hint-card {
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+/* ==========================================================================
+   RESPONSIVE QUERIES
+   ========================================================================== */
+@media (max-width: 992px) {
+    .main-container {
+        padding: 14px !important;
+    }
+    header.app-top-header {
+        padding: 6px 14px !important;
+    }
+    .nav-links {
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+}

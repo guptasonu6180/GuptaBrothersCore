@@ -1,0 +1,481 @@
+@model List<GuptaBrothers.Web.Models.ShippingLabelModel>
+@{
+    ViewBag.Title = "Gupta Brothers - Smart Logistics Dashboard";
+    int totalCount = ViewBag.TotalCount ?? 0;
+    int totalItems = ViewBag.TotalItems ?? 0;
+    decimal totalAmount = ViewBag.TotalAmount ?? 0m;
+    decimal totalTaxes = ViewBag.TotalTaxes ?? 0m;
+}
+
+<div class="container-fluid px-0">
+    <!-- Top Futuristic KPI Summary Cards -->
+    <div class="row g-3 mb-3">
+        <!-- 1. Total Orders -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card-futuristic card-cyan">
+                <div>
+                    <span class="kpi-label-cyan">Total Orders</span>
+                    <h2 class="kpi-value-text">@totalCount</h2>
+                    <span class="kpi-badge-cyan">
+                        <i class="bi bi-shield-check me-1"></i>Active Queue
+                    </span>
+                </div>
+                <div class="kpi-icon-cyber kpi-icon-cyan">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Total Units -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card-futuristic card-emerald">
+                <div>
+                    <span class="kpi-label-emerald">Total Quantity</span>
+                    <h2 class="kpi-value-text">@totalItems</h2>
+                    <span class="kpi-badge-emerald">
+                        <i class="bi bi-bag-check-fill me-1"></i>Units to Pack
+                    </span>
+                </div>
+                <div class="kpi-icon-cyber kpi-icon-emerald">
+                    <i class="bi bi-layers-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Total Taxes (GST) -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card-futuristic card-purple">
+                <div>
+                    <span class="kpi-label-purple">Total Taxes (GST)</span>
+                    <h2 class="kpi-value-currency">₹@totalTaxes.ToString("N2")</h2>
+                    <span class="kpi-badge-purple">
+                        <i class="bi bi-percent me-1"></i>3.0% IGST / GST
+                    </span>
+                </div>
+                <div class="kpi-icon-cyber kpi-icon-purple">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Total Gross Amount -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card-futuristic card-amber">
+                <div>
+                    <span class="kpi-label-amber">Total Invoice Value</span>
+                    <h2 class="kpi-value-currency">₹@totalAmount.ToString("N2")</h2>
+                    <span class="kpi-badge-amber">
+                        <i class="bi bi-currency-rupee me-1"></i>Combined Total
+                    </span>
+                </div>
+                <div class="kpi-icon-cyber kpi-icon-amber">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Toolbar Card: Brand Logo near filter + Compact small buttons with hover tooltips -->
+    <div class="toolbar-card">
+        <div class="row g-2 align-items-center">
+            <!-- Filter Group: Gupta Brothers Logo near Filter + Instant Live Search -->
+            <div class="col-12 col-xl-5 col-lg-5">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="toolbar-filter-logo" data-bs-toggle="tooltip" data-bs-placement="top" title="Gupta Brothers Shipping System">
+                        <img src="~/images/gupta-brothers-emblem.svg" alt="GB Logo" />
+                    </div>
+                    <div class="search-input-group flex-grow-1">
+                        <span class="search-icon-addon">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="liveSearchInput" class="form-control search-input-field" 
+                               placeholder="Filter by AWB, Order No, Customer, SKU, City..." 
+                               value="@ViewBag.SearchTerm" onkeyup="filterTableLive()" />
+                        <button class="btn search-clear-btn" type="button" onclick="clearLiveSearch()" data-bs-toggle="tooltip" data-bs-placement="top" title="Clear filter text">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons: Compact (btn-sm), Single-Line, Tooltips on Hover -->
+            <div class="col-12 col-xl-7 col-lg-7 d-flex align-items-center justify-content-lg-end gap-2 flex-wrap">
+                <!-- 1. Import Excel -->
+                <button type="button" class="btn btn-action-pill btn-pill-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload spreadsheet (.xlsx, .csv) to generate labels">
+                    <i class="bi bi-cloud-arrow-up-fill"></i> Import
+                </button>
+
+                <!-- 2. Sample Template -->
+                <a asp-action="DownloadTemplate" class="btn btn-action-pill btn-pill-emerald" data-bs-toggle="tooltip" data-bs-placement="top" title="Download fixed format 14-column Excel template">
+                    <i class="bi bi-file-earmark-excel"></i> Template
+                </a>
+
+                <!-- 3. Export Excel -->
+                <a asp-action="ExportExcel" class="btn btn-action-pill btn-pill-purple" data-bs-toggle="tooltip" data-bs-placement="top" title="Export all shipping records to Excel (.xlsx)">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+                </a>
+
+                <!-- 3b. Export PDF -->
+                <a asp-action="ExportPdf" class="btn btn-action-pill btn-pill-pdf" data-bs-toggle="tooltip" data-bs-placement="top" title="Export all shipping labels as vector PDF document">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+                </a>
+
+                <!-- 4. Print All Labels -->
+                <a asp-action="Print" target="_blank" class="btn btn-action-pill btn-pill-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="Print thermal half shipping labels for all orders">
+                    <i class="bi bi-printer-fill"></i> Print All <span class="badge bg-secondary ms-1">@totalCount</span>
+                </a>
+
+                <!-- 5. Print Selected -->
+                <button type="button" id="btnPrintSelected" class="btn btn-action-pill btn-pill-outline" disabled onclick="printSelectedLabels()" data-bs-toggle="tooltip" data-bs-placement="top" title="Print thermal labels for selected rows">
+                    <i class="bi bi-check2-square"></i> Selected <span class="badge bg-light text-dark border ms-1" id="selectedCountBadge">0</span>
+                </button>
+
+                <!-- 5b. Export Selected PDF -->
+                <button type="button" id="btnExportSelectedPdf" class="btn btn-action-pill btn-pill-outline" disabled onclick="exportSelectedPdf()" data-bs-toggle="tooltip" data-bs-placement="top" title="Export PDF for selected orders">
+                    <i class="bi bi-file-earmark-arrow-down"></i> PDF Selected
+                </button>
+
+                <!-- 6. New Order -->
+                <a asp-action="Create" class="btn btn-action-pill btn-pill-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Create a new shipping label manually">
+                    <i class="bi bi-plus-lg"></i> New
+                </a>
+
+                <!-- 7. More Options Dropdown -->
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-action-pill btn-pill-outline btn-pill-icon-only dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-toggle="tooltip" data-bs-placement="top" title="More options">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3">
+                        <li>
+                            <form asp-action="ResetSample" method="post" onsubmit="return confirm('Reset all records to Gupta Brothers 7 default sample orders?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item py-2">
+                                    <i class="bi bi-arrow-counterclockwise me-2 text-info"></i> Reset to Sample Data
+                                </button>
+                            </form>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form asp-action="ClearAll" method="post" onsubmit="return confirm('Delete ALL shipping labels in system?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                    <i class="bi bi-trash3 me-2"></i> Clear All Records
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card Container: Spacious Large Columns, Complete Untruncated Details -->
+    <div class="table-card-container">
+        <div class="table-card-header">
+            <div class="table-header-title-box">
+                <div class="table-header-icon-pill">
+                    <i class="bi bi-table"></i>
+                </div>
+                <h6 class="table-header-title">
+                    Gupta Brothers Shipping Records
+                </h6>
+                <span class="badge rounded-pill bg-light text-dark border ms-1" id="tableItemCountBadge">@Model.Count labels</span>
+            </div>
+            <div class="small text-muted">
+                <i class="bi bi-qr-code-scan me-1 text-primary"></i> Click any <strong>QR Code</strong> to inspect in high resolution.
+            </div>
+        </div>
+
+        <div class="table-scroll-container">
+            <table class="table align-middle mb-0 table-large-details" id="labelsMainTable">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 44px; min-width: 44px;">
+                            <input type="checkbox" id="chkSelectAll" class="form-check-input" onchange="toggleSelectAll(this)" data-bs-toggle="tooltip" data-bs-placement="top" title="Select all orders" />
+                        </th>
+                        <th style="width: 210px; min-width: 210px;">AWB / TRACKING &amp; BARCODE</th>
+                        <th style="width: 270px; min-width: 270px;">ORDER &amp; INVOICE</th>
+                        <th style="width: 330px; min-width: 330px;">CUSTOMER &amp; DESTINATION</th>
+                        <th style="width: 370px; min-width: 370px;">PRODUCT / SKU</th>
+                        <th class="text-center" style="width: 65px; min-width: 65px;">QTY</th>
+                        <th style="width: 140px; min-width: 140px;">TOTAL (INR)</th>
+                        <th class="text-center" style="width: 90px; min-width: 90px;">QR CODE</th>
+                        <th class="text-end pe-3" style="width: 215px; min-width: 215px;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="labelsTableBody">
+                    @if (Model.Count == 0)
+                    {
+                        <tr id="noRecordsRow">
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox display-4 d-block mb-3 text-secondary"></i>
+                                <h6 class="fw-bold">No shipping labels loaded</h6>
+                                <p class="text-muted small mb-3">Upload your Excel file or load Gupta Brothers demo data to start printing.</p>
+                                <button type="button" class="btn btn-action-pill btn-pill-primary px-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                    <i class="bi bi-file-earmark-arrow-up"></i> Upload Excel
+                                </button>
+                                <form asp-action="ResetSample" method="post" class="d-inline-block ms-2">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-action-pill btn-pill-emerald px-3">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Load Demo Orders
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="label-row" data-search-target="@item.AWBNumber @item.OrderNo @item.CustomerName @item.CustomerCity @item.CustomerState @item.SKU @item.InvoiceNo">
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input chkRow" value="@item.Id" onchange="updateSelectedCount()" />
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark font-monospace" style="font-size: 0.92rem;">@item.AWBNumber</div>
+                                    <div class="d-flex align-items-center gap-1 my-1">
+                                        <span class="badge bg-dark" style="font-size: 0.65rem;">@item.CourierName</span>
+                                        <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">@item.PickupDateBadge</span>
+                                        <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">@item.HubCode</span>
+                                    </div>
+                                    <div class="barcode-cell-container">
+                                        @Html.Raw(item.BarcodeSvg)
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Full 20-digit Order Number (NO ellipses truncation) -->
+                                    <div class="order-no-text">
+                                        @item.OrderNo
+                                    </div>
+                                    <div class="small text-muted mt-1" style="font-size: 0.78rem;">
+                                        Inv: <span class="fw-semibold text-dark font-monospace">@item.InvoiceNo</span>
+                                    </div>
+                                    <div class="small text-secondary" style="font-size: 0.74rem;">
+                                        Date: @item.OrderDate
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Full Customer Name and Complete Destination Address -->
+                                    <div class="customer-name-text">@item.CustomerName</div>
+                                    <div class="customer-address-full">
+                                        @item.CustomerAddressLine1
+                                        @if (!string.IsNullOrWhiteSpace(item.CustomerAddressLine2))
+                                        {
+                                            <span>, @item.CustomerAddressLine2</span>
+                                        }
+                                        <span>, @item.CustomerCity</span>
+                                    </div>
+                                    <div class="small text-secondary mt-1" style="font-size: 0.76rem;">
+                                        <strong>@item.CustomerState</strong> - @item.CustomerPincode
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Full Product Details, SKU, Description, and Variations -->
+                                    <div>
+                                        <span class="product-sku-badge">@item.SKU</span>
+                                    </div>
+                                    <div class="product-desc-full">
+                                        @item.ItemDescription
+                                    </div>
+                                    <div class="small text-secondary mt-1" style="font-size: 0.74rem;">
+                                        Size: <span class="fw-medium text-dark">@item.Size</span> | Color: <span class="fw-medium text-dark">@item.Color</span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary rounded-pill px-2 py-1" style="font-size: 0.75rem;">@item.Qty</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-success" style="font-size: 0.95rem;">₹@item.GrandTotal.ToString("N2")</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">
+                                        Tax: ₹@item.TotalTaxes.ToString("N2")
+                                    </div>
+                                    <span class="badge @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-warning text-dark")" style="font-size: 0.65rem;">
+                                        @(item.PaymentStatus.Contains("Prepaid", StringComparison.OrdinalIgnoreCase) ? "Prepaid" : "COD / Collect")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <!-- Base64 PNG QR Code Thumbnail with Zoom Modal -->
+                                    <div class="qr-thumb-card" data-bs-toggle="tooltip" data-bs-placement="top" title="Click to inspect large QR Code" 
+                                         onclick="showQrModal('@item.AWBNumber', '@item.OrderNo', '@item.CustomerName', '@item.CustomerCity', '@item.QrCodeBase64')">
+                                        @if (!string.IsNullOrEmpty(item.QrCodeBase64))
+                                        {
+                                            <img src="@item.QrCodeBase64" alt="QR Code" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-qr-code text-muted"></i>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-end pe-3" style="width: 215px; min-width: 215px; white-space: nowrap !important;">
+                                    <!-- Clean Action Buttons: Guaranteed No Text Wrapping -->
+                                    <div class="actions-cell-container">
+                                        <!-- 1. View Half Label Button -->
+                                        <a asp-action="ViewPdf" asp-route-id="@item.Id" class="btn-table-action btn-table-preview" data-bs-toggle="tooltip" data-bs-placement="top" title="Preview half shipping label">
+                                            <i class="bi bi-eye me-1"></i><span>View</span>
+                                        </a>
+
+                                        <!-- 2. Download Vector PDF -->
+                                        <a asp-action="DownloadPdf" asp-route-id="@item.Id" class="btn-table-action btn-table-pdf" data-bs-toggle="tooltip" data-bs-placement="top" title="Download vector PDF label">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+
+                                        <!-- 3. Print Thermal Label Button -->
+                                        <a asp-action="Print" asp-route-ids="@item.Id" target="_blank" class="btn-table-action btn-table-print" data-bs-toggle="tooltip" data-bs-placement="top" title="Print thermal shipping label">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+
+                                        <!-- 4. Edit Order Button -->
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-table-action btn-table-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit order details">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <!-- 5. Delete Order Button -->
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline m-0 p-0" onsubmit="return confirm('Delete shipping label for AWB @item.AWBNumber?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-table-action btn-table-delete" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete shipping record">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- High-Tech QR Code & Order Inspector Modal -->
+<div class="modal fade" id="qrZoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg text-center qr-modal-frame">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle p-2 bg-light text-primary">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <h6 class="fw-bold mb-0 text-dark">High-Resolution QR Code</h6>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- High-Res QR Image Box -->
+            <div class="qr-modal-image-box">
+                <img id="qrModalImg" src="" alt="High-Res QR Code" />
+            </div>
+
+            <!-- Order Metadata Details -->
+            <div class="qr-modal-info-panel">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">AWB Number:</span>
+                    <strong class="font-monospace text-primary" id="qrModalAwb"></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Order Number:</span>
+                    <span class="fw-semibold text-dark font-monospace small" id="qrModalOrder"></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Customer & City:</span>
+                    <span class="fw-semibold text-dark" id="qrModalCustomer"></span>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="d-flex justify-content-center gap-2">
+                <a id="btnDownloadQr" href="" download="QRCode.png" class="btn btn-action-pill btn-pill-primary px-3" data-bs-toggle="tooltip" title="Download QR Code as PNG image">
+                    <i class="bi bi-download me-1"></i> Download QR Image
+                </a>
+                <button type="button" class="btn btn-action-pill btn-pill-outline px-3" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function initTooltips() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, { trigger: 'hover' });
+        });
+    }
+
+    $(document).ready(function () {
+        initTooltips();
+    });
+
+    function toggleSelectAll(master) {
+        $('.chkRow').prop('checked', master.checked);
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        var count = $('.chkRow:checked').length;
+        $('#selectedCountBadge').text(count);
+        $('#btnPrintSelected').prop('disabled', count === 0);
+        $('#btnExportSelectedPdf').prop('disabled', count === 0);
+    }
+
+    function printSelectedLabels() {
+        var selectedIds = [];
+        $('.chkRow:checked').each(function () {
+            selectedIds.push($(this).val());
+        });
+        if (selectedIds.length === 0) {
+            alert('Please select at least one shipping label to print.');
+            return;
+        }
+        var url = '@Url.Action("Print", "ShippingLabel")?ids=' + encodeURIComponent(selectedIds.join(','));
+        window.open(url, '_blank');
+    }
+
+    function exportSelectedPdf() {
+        var selectedIds = [];
+        $('.chkRow:checked').each(function () {
+            selectedIds.push($(this).val());
+        });
+        if (selectedIds.length === 0) {
+            alert('Please select at least one shipping label to export.');
+            return;
+        }
+        window.location.href = '@Url.Action("ExportPdf", "ShippingLabel")?ids=' + encodeURIComponent(selectedIds.join(','));
+    }
+
+    // Client-side real-time live search
+    function filterTableLive() {
+        var query = $('#liveSearchInput').val().toLowerCase().trim();
+        var visibleCount = 0;
+        
+        $('.label-row').each(function () {
+            var target = $(this).attr('data-search-target').toLowerCase();
+            if (query === '' || target.indexOf(query) !== -1) {
+                $(this).show();
+                visibleCount++;
+            } else {
+                $(this).hide();
+            }
+        });
+
+        $('#tableItemCountBadge').text(visibleCount + ' labels');
+    }
+
+    function clearLiveSearch() {
+        $('#liveSearchInput').val('');
+        filterTableLive();
+    }
+
+    function showQrModal(awb, orderNo, customer, city, imgSrc) {
+        $('#qrModalAwb').text(awb);
+        $('#qrModalOrder').text(orderNo);
+        $('#qrModalCustomer').text(customer + ' (' + city + ')');
+        $('#qrModalImg').attr('src', imgSrc);
+        $('#btnDownloadQr').attr('href', imgSrc).attr('download', 'QR_' + awb + '.png');
+        $('#qrZoomModal').modal('show');
+    }
+</script>
+}

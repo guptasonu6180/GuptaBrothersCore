@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 84" width="420" height="84">
+  <defs>
+    <linearGradient id="gbGlowHoriz" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="gbBlueLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <filter id="logoShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#06b6d4" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Left Emblem Box -->
+  <g transform="translate(6, 6) scale(0.6)">
+    <!-- Background Shield -->
+    <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#shieldGrad)" stroke="url(#gbGlowHoriz)" stroke-width="3" filter="url(#logoShadow)"/>
+    
+    <!-- Letter G -->
+    <path d="M 52 35 C 38 35, 27 45, 27 60 C 27 75, 38 85, 52 85 C 62 85, 66 79, 66 73 L 66 63 L 47 63 L 47 54 L 75 54 L 75 74 C 75 85, 66 93, 51 93 C 33 93, 18 79, 18 60 C 18 41, 33 27, 52 27 C 62 27, 70 31, 75 37 L 67 43 C 63 38, 58 35, 52 35 Z" fill="url(#gbGlowHoriz)"/>
+
+    <!-- Letter B -->
+    <path d="M 64 29 L 86 29 C 96 29, 103 35, 103 44 C 103 50, 99 55, 93 57 C 100 60, 105 66, 105 75 C 105 85, 97 91, 85 91 L 64 91 Z M 74 38 L 74 53 L 84 53 C 90 53, 94 50, 94 45.5 C 94 41, 90 38, 84 38 Z M 74 62 L 74 82 L 85 82 C 91 82, 96 78, 96 72 C 96 66, 91 62, 85 62 Z" fill="url(#gbBlueLight)"/>
+
+    <!-- Central Spark -->
+    <polygon points="63,22 66,16 69,22 75,25 69,28 66,34 63,28 57,25" fill="#38bdf8"/>
+  </g>
+
+  <!-- Typography: GUPTA BROTHERS -->
+  <g transform="translate(90, 44)">
+    <text font-family="'Space Grotesk', 'Inter', system-ui, sans-serif" font-size="28" font-weight="800" fill="#ffffff" letter-spacing="-0.5">
+      GUPTA
+      <tspan fill="url(#gbBlueLight)" dx="4">BROTHERS</tspan>
+    </text>
+  </g>
+
+  <!-- Subtitle Tagline -->
+  <g transform="translate(92, 64)">
+    <text font-family="'Inter', system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#94a3b8" letter-spacing="2" text-transform="uppercase">
+      SMART LOGISTICS • LABELS &amp; TAX INVOICES
+    </text>
+  </g>
+
+  <!-- Badge Pill -->
+  <g transform="translate(365, 28)">
+    <rect x="0" y="0" width="46" height="18" rx="9" fill="rgba(6, 182, 212, 0.15)" stroke="rgba(56, 189, 248, 0.5)" stroke-width="1"/>
+    <text x="23" y="12" font-family="'Inter', sans-serif" font-size="8.5" font-weight="700" fill="#38bdf8" text-anchor="middle" letter-spacing="0.5">
+      v2.5
+    </text>
+  </g>
+</svg>

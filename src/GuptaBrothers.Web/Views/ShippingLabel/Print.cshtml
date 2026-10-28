@@ -1,0 +1,152 @@
+@model List<GuptaBrothers.Web.Models.ShippingLabelModel>
+@{
+    Layout = null; // Standalone printable view
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Print Shipping Labels (@Model.Count) - Gupta Brothers</title>
+    <link rel="icon" href="~/images/gupta-brothers-emblem.svg" type="image/svg+xml">
+    
+    <!-- Gupta Brothers Half Label & Print Stylesheets -->
+    <link href="~/css/shipping-label.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/print-label.css" rel="stylesheet" asp-append-version="true" />
+</head>
+<body class="print-preview-mode">
+
+    <!-- On-Screen Navigation & Print Toolbar -->
+    <div class="no-print-toolbar">
+        <div class="toolbar-brand-box">
+            <img src="~/images/gupta-brothers-emblem.svg" alt="GB" class="toolbar-logo-icon" />
+            <div>
+                <strong>Gupta Brothers</strong> - Thermal Shipping Labels (Half Format)
+                <span class="toolbar-badge">
+                    Showing @Model.Count label(s)
+                </span>
+            </div>
+        </div>
+        <div class="toolbar-actions">
+            <a href="@Url.Action("Index", "ShippingLabel")" class="btn btn-secondary">
+                &larr; Back to Dashboard
+            </a>
+            <a href="@Url.Action("ExportPdf", "ShippingLabel", new { ids = string.Join(",", Model.Select(m => m.Id)) })" class="btn" style="background: #dc2626; color: #ffffff;">
+                📥 Download PDF
+            </a>
+            <button type="button" onclick="window.print()" class="btn">
+                🖨️ Print Labels Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Container for Stacked Printable Half Labels -->
+    <div class="labels-container">
+        @foreach (var label in Model)
+        {
+            <div class="label-page">
+                <div class="half-label-card">
+                    <!-- TOP SECTION -->
+                    <div class="half-label-top">
+                        <!-- Top Left: Customer Address + Return Address -->
+                        <div class="half-label-left">
+                            <div class="half-label-cust-box">
+                                <div class="half-label-sec-heading">Customer Address</div>
+                                <div class="half-label-cust-name">@label.CustomerName</div>
+                                <div class="half-label-text">@label.CustomerAddressLine1</div>
+                                @if (!string.IsNullOrWhiteSpace(label.CustomerAddressLine2))
+                                {
+                                    <div class="half-label-text">@label.CustomerAddressLine2</div>
+                                }
+                                <div class="half-label-text">
+                                    @label.CustomerCity, @label.CustomerState, @label.CustomerPincode
+                                </div>
+                            </div>
+
+                            <div class="half-label-return-box">
+                                <div class="half-label-sec-heading">If undelivered, return to:</div>
+                                <div class="half-label-comp-name">@label.ReturnCompanyName</div>
+                                <div class="half-label-text">@label.ReturnAddressLine1</div>
+                                @if (!string.IsNullOrWhiteSpace(label.ReturnAddressLine2))
+                                {
+                                    <div class="half-label-text">@label.ReturnAddressLine2</div>
+                                }
+                                <div class="half-label-text">@label.ReturnArea</div>
+                                <div class="half-label-text">@label.ReturnCityStatePin</div>
+                            </div>
+                        </div>
+
+                        <!-- Top Right: Payment Status + Pickup/Routing + QR Code + Barcode -->
+                        <div class="half-label-right">
+                            <div class="half-label-payment-banner">
+                                @label.PaymentStatus
+                            </div>
+
+                            <div class="half-label-content-right">
+                                <div class="half-label-routing-row">
+                                    <div class="half-label-routing-details">
+                                        <div class="half-label-courier-line">
+                                            <span class="half-label-courier-name">@label.CourierName</span>
+                                            <span class="half-label-badge-pickup">@label.PickupBadgeText</span>
+                                            <span class="half-label-badge-date">@label.PickupDateBadge</span>
+                                        </div>
+                                        <div class="half-label-hub-code">@label.HubCode</div>
+                                        <div class="half-label-route-lines">
+                                            @if (!string.IsNullOrWhiteSpace(label.RoutingLine1)) { <div>@label.RoutingLine1</div> }
+                                            @if (!string.IsNullOrWhiteSpace(label.RoutingLine2)) { <div>@label.RoutingLine2</div> }
+                                            @if (!string.IsNullOrWhiteSpace(label.RoutingLine3)) { <div>@label.RoutingLine3</div> }
+                                        </div>
+                                    </div>
+                                    <div class="half-label-qr-box">
+                                        @if (!string.IsNullOrEmpty(label.QrCodeBase64))
+                                        {
+                                            <img src="@label.QrCodeBase64" alt="QR Code" />
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw(label.QrCodeSvg)
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Vector Code 128 Barcode + AWB -->
+                                <div class="half-label-barcode-row">
+                                    <div class="half-label-awb-text">@label.AWBNumber</div>
+                                    <div class="half-label-barcode-svg">
+                                        @Html.Raw(label.BarcodeSvg)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCT DETAILS SECTION -->
+                    <div class="half-label-product-header">
+                        Product Details
+                    </div>
+                    <table class="half-label-product-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 44%;">SKU</th>
+                                <th style="width: 15%;">Size</th>
+                                <th style="width: 9%;">Qty</th>
+                                <th style="width: 13%;">Color</th>
+                                <th style="width: 19%;">Order No.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@label.SKU</td>
+                                <td>@label.Size</td>
+                                <td>@label.Qty</td>
+                                <td>@label.Color</td>
+                                <td>@label.OrderNo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+</body>
+</html>
